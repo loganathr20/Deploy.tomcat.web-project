@@ -13,7 +13,7 @@ pipeline {
                 sh "mvn clean install"
             }
         }
-        stage('upload artifact to nexus') {
+        <! -- stage('upload artifact to nexus') {
             steps {
                 nexusArtifactUploader artifacts: [
                     [
@@ -22,7 +22,7 @@ pipeline {
                         file: 'target/wwp-1.0.0.war', 
                         type: 'war'
                     ]
-                ], 
+                ] 
                     credentialsId: 'nexus3', 
                     groupId: 'koddas.web.war', 
                     nexusUrl: '10.0.0.91:8081', 
@@ -30,7 +30,7 @@ pipeline {
                     protocol: 'http', 
                     repository: 'samplerepo', 
                     version: '1.0.0'
-            }
+            } -->
         }
     }
     post {
@@ -38,7 +38,7 @@ pipeline {
             deleteDir()
         }
         failure {
-            echo "sendmail -s mvn build failed receipients@my.com"
+            echo "sendmail -s mvn build failed loganathr21@gmail.com"
         }
         success {
             echo "The job is successful"
