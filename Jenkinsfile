@@ -23,27 +23,27 @@ pipeline
                }
            }
            
-           stage('Build Phase') {
+           stage('Build ') {
                steps {
                     sh "mvn clean install"
                }
            }
 
 
-          stage('Test Phase') {
+          stage('Unit Test ') {
                steps {
                     echo "  Test Phase "
                }
            }
 
-           stage('Deploy Phase') {
+           stage('Deploy') {
                steps {
                     echo "  Deploy Phase "
                }
            }
 
 
-           stage('Restart Servers Phase') {
+           stage('Restart Servers') {
                steps {
                     echo "  Restart Servers  Phase "
                }
