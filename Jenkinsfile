@@ -22,17 +22,7 @@ pipeline
                     echo ' ANT_HOME is $ANT_HOME '
                }
            }
-
-           stage('SCM Checkout  ') {
-               steps {
-                    echo " Prebuild action "
-                    echo  ' JAVA_HOME is $JAVA_HOME '
-                    echo ' M2_HOME is $M2_HOME '
-                    echo ' JENKINS_HOME is $JENKINS_HOME '
-                    echo ' ANT_HOME is $ANT_HOME '
-               }
-           }
-           
+             
            stage('Pre-Build ') {
                steps {
                     echo " Prebuild action "
