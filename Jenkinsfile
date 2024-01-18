@@ -31,7 +31,7 @@ pipeline
                     echo ' JENKINS_HOME is $JENKINS_HOME '
                     echo ' ANT_HOME is $ANT_HOME '
                }
-           
+           }
            
            stage('Pre-Build ') {
                steps {
