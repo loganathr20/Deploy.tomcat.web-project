@@ -15,7 +15,7 @@ pipeline
        {
            stage('Pre-Build') {
                steps {
-                    echo " Hello - Prebuild action "
+                    echo " Prebuild action "
                     echo  ' JAVA_HOME is $JAVA_HOME '
                     echo ' M2_HOME is $M2_HOME '
                     echo ' JENKINS_HOME is $JENKINS_HOME '
@@ -23,15 +23,41 @@ pipeline
                }
            }
            
-           stage('Build') {
+           stage('Build Phase') {
                steps {
                     sh "mvn clean install"
                }
            }
 
+
+          stage('Test Phase') {
+               steps {
+                    echo "  Test Phase "
+               }
+           }
+
+           stage('Deploy Phase') {
+               steps {
+                    echo "  Deploy Phase "
+               }
+           }
+
+
+           stage('Restart Servers Phase') {
+               steps {
+                    echo "  Restart Servers  Phase "
+               }
+           }
+           
            stage('post-Build') {
                steps {
-                    echo " Hello - Post build action"
+                    echo " Post build action"
+               }
+           }
+
+           stage('Notification') {
+               steps {
+                    echo "Email Notification "
                }
            }
        }
