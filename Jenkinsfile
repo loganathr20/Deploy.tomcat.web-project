@@ -57,9 +57,10 @@ pipeline
            stage('Restart Servers') {
                steps {
                     echo "  Restart Servers  Phase "
-                    sudo systemctl restart tomcat
+                    sh '''cd /opt/tomcat/bin   ./startup.sh''';
                }
            }
+
            
            stage('Sanity Check') {
                steps {
