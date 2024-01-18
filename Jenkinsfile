@@ -15,11 +15,11 @@ pipeline
        {
            stage('Pre-Build') {
                steps {
-                    echo " Hello - Prebuild action"
-                    echo  " JAVA_HOME is $JAVA_HOME "
-                    echo " M2_HOME is $M2_HOME "
-                    echo " JENKINS_HOME is $JENKINS_HOME "
-                    echo " ANT_HOME is $ANT_HOME "
+                    echo " Hello - Prebuild action "
+                    echo  ' JAVA_HOME is $JAVA_HOME '
+                    echo ' M2_HOME is $M2_HOME '
+                    echo ' JENKINS_HOME is $JENKINS_HOME '
+                    echo ' ANT_HOME is $ANT_HOME '
                }
            }
            
