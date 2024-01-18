@@ -57,7 +57,9 @@ pipeline
            stage('Restart Servers') {
                steps {
                     echo "  Restart Servers  Phase "
-                    sh '''cd /opt/tomcat/bin   ./startup.sh''';
+                    sh '/opt/tomcat/bin/shutdown.sh'
+                    sh '/opt/tomcat/bin/startup.sh'
+                    
                }
            }
 
