@@ -36,7 +36,7 @@ pipeline
            stage('Build ') {
                steps {
                     sh "mvn clean install"
-                    archiveArtifacts artifacts: '\'target/*.jar, target/*.war\'', followSymlinks: false
+                    archiveArtifacts artifacts: 'target/*.war\'', followSymlinks: false
                }
            }
 
