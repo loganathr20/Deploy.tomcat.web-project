@@ -60,9 +60,9 @@ pipeline
                }
            }
            
-           stage('post-Build') {
+           stage('Sanity Check') {
                steps {
-                    echo " Post build action"
+                    echo " Sanity Check action"
                }
            }
 
