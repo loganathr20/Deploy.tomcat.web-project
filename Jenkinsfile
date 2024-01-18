@@ -8,7 +8,7 @@ pipeline
     
     options {
         timeout(10)
-        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '5')
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '2', numToKeepStr: '2')
     }
     
     stages 
@@ -82,12 +82,18 @@ pipeline
         always{
             deleteDir()
         }
+        
         failure {
             echo "sendmail -s mvn build failed loganathr21@gmail.com "
+            mail to: "loganathr21@gmail.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Boo, we failed."
+
         }
+        
         success {
             echo "The job is successful"
-        }
+            mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+
+        }        
     }
 
 }
