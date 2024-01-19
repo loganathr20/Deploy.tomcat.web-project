@@ -92,6 +92,13 @@ pipeline
         success {
             echo "The job is successful"
           //  mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+             emailext (
+                   subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                   body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                   <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+                   recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                )
+            //
 
         }        
     }
