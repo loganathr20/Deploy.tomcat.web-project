@@ -141,7 +141,7 @@ pipeline
 
                       
 //             sendMail('mailhost', messageSender, messageReceivers, messageSubject, messageAllText)
-
+/*
              mail to: 'loganathr21@gmail.com',
                  subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
                  body: "Please go to ${env.BUILD_URL}."
