@@ -5,7 +5,9 @@ import javax.mail.*
 import javax.mail.internet.*
 import hudson.model.*
 
+def manager = "my manager" // probably not what you want
 
+/* 
 def build = Thread.currentThread().executable
 def result = "And the result is: " 
 def BUILD_NUMBER = build.number
@@ -15,6 +17,13 @@ def BUILD_URL=build.url
 def body = "Job Name: ${JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${BUILD_URL} "  + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins"
 def subject = " ${JOB_NAME}>> ${BUILD_NUMBER} >> ${result} "
 
+*/
+
+def result = manager.build.result
+manager.listener.logger.println "And the result is: ${result}"
+def environment = manager.getEnvVars()
+def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator")+" Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
+def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
 
 
 def sendMail(host, sender, receivers, subject, text) {
