@@ -1,3 +1,4 @@
+
 import javax.mail.*
 import javax.mail.internet.*
 
@@ -125,11 +126,16 @@ pipeline
             // archiveArtifacts artifacts: 'archiveArtifacts artifacts: \'target/*.jar, target/*.war\'', followSymlinks: false, onlyIfSuccessful: true
             
             // mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
-             mail to: 'loganathr21@gmail.com',
+
+             sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+
+             sendMail('mailhost', messageSender, messageReceivers, messageSubject, messageAllText)
+
+            /* mail to: 'loganathr21@gmail.com',
                  subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
                  body: "Please go to ${env.BUILD_URL}."
            
-            /*   emailext (
+                emailext (
                    subject: "SUCCESSFUL Notification : Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                    body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                    <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
