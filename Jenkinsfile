@@ -6,10 +6,11 @@ import javax.mail.internet.*
 
 
 // def result = manager.build.result
+  def result = "And the result is: "" 
 // manager.listener.logger.println "And the result is: ${result}"
 // def environment = manager.getEnvVars()
  // def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} "  + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins"
-// def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
+def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
 
 
 def sendMail(host, sender, receivers, subject, text) {
