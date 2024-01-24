@@ -22,6 +22,7 @@ def sendMail(host, sender, receivers, subject, text) {
 }
 
 
+
 pipeline 
 {
     agent any
@@ -127,9 +128,25 @@ pipeline
             
             // mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
 
-             sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+//             sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
 
-             sendMail('mailhost', messageSender, messageReceivers, messageSubject, messageAllText)
+
+            def result = manager.build.result
+            manager.listener.logger.println "And the result is: ${result}"
+            def environment = manager.getEnvVars()
+            def body = "Job Name: ${environment.JOB_NAME} "+ 
+            System.getProperty("line.separator")+" Build Number: 
+            ${environment.BUILD_NUMBER} "+ System.getProperty("line.separator")+" Build 
+            Status: ${result} " + System.getProperty("line.separator") 
+            + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} "
+            + System.getProperty("line.separator")
+            + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins"
+
+            def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
+            sendMail('smtp.gmail.com', "loganathr21@gmail.comm", "loganathr21@gmail.com", "APPID>>${subject}", "${body}")
+
+                      
+//             sendMail('mailhost', messageSender, messageReceivers, messageSubject, messageAllText)
 
             /* mail to: 'loganathr21@gmail.com',
                  subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
