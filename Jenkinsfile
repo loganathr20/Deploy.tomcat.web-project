@@ -110,7 +110,7 @@ pipeline
                 }
             } */
 
-           stage('Notification : Send Email') {
+           stage('Notifications : Send Email') {
              steps {
                 script {
                     def mailRecipients = 'loganathr21@gmail.com'
