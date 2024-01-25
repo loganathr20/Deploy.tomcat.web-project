@@ -6,9 +6,10 @@ import javax.mail.internet.*
 // def manager = "manager" // probably not what you want
 
 
-def result = manager.build.result
+// def result = manager.build.result
 // manager.listener.logger.println "And the result is: ${result}"
 def environment = manager.getEnvVars()
+def buildNumber = manager.build.number
 
 echo " Job Name: ${environment.JOB_NAME} "
 echo " Build Number: ${environment.BUILD_NUMBER} " 
