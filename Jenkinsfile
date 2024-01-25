@@ -109,25 +109,22 @@ pipeline
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                 }
             }
-       }
-
     
     post {
         always{
             deleteDir()
         }
-
         
         failure {
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
 
             // send to email
+         }
         
         success {
             echo "The job is successful"
-           
             /*  send to email
-           emailext (
+            emailext (
                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
@@ -136,4 +133,3 @@ pipeline
         }
 
 }  // end pipeline
-
