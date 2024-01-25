@@ -98,22 +98,21 @@ pipeline
                     echo "  Restart Servers  Phase "
                    /*  sh '/opt/tomcat/bin/shutdown.sh'
                     sh '/opt/tomcat/bin/startup.sh' */
-                    
                }
-           }
+            }
 
            
            stage('Sanity Check') {
                steps {
                     echo " Sanity Check action"
                }
-           }
+            }
 
            stage('Notification') {
                steps {
                     echo "Email Notification "
                }
-           }
+            }
        }
 
     
@@ -131,7 +130,7 @@ pipeline
                 subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                  <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
              }
         
         success {
@@ -142,7 +141,7 @@ pipeline
                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-               recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+               recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
             )
             
         }        
