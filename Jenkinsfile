@@ -98,8 +98,8 @@ pipeline
            stage('Notification : Send Email') {
                steps {
                     echo "Email Notification "
-                    mailRecipients = "loganathr21@gmail.com"
-                    jobName = currentBuild.fullDisplayName
+                    def mailRecipients = "loganathr21@gmail.com"
+                    def jobName = currentBuild.fullDisplayName
 
                     emailext body: '''${SCRIPT, template="groovy-html.template"}''',
                     mimeType: 'text/html',
