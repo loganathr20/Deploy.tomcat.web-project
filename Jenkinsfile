@@ -5,8 +5,8 @@ import javax.mail.*
 import javax.mail.internet.*
 // import hudson.model.*
 
-Binding binding = new Binding();
-binding.setVariable("manager", manager);
+// Binding binding = new Binding();
+// binding.setVariable("manager", manager);
 
 def manager = "my manager" // probably not what you want
 
