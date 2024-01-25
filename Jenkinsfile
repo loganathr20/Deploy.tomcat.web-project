@@ -117,7 +117,6 @@ pipeline
         
         failure {
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
-
             // send to email
          }
         
@@ -130,6 +129,6 @@ pipeline
                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
             }  */
-        }
-
+         }
+    } // end of post 
 }  // end pipeline
