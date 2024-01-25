@@ -4,21 +4,6 @@ import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
 
-    
-// def manager = "manager" // probably not what you want
-// def result = manager.build.result
-// manager.listener.logger.println "And the result is: ${result}"
-//def environment = manager.getEnvVars()
-//def buildNumber = manager.build.number
-
-// echo " Job Name: ${environment.JOB_NAME} "
-// echo " Build Number: ${environment.BUILD_NUMBER} " 
-
-// def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
-//def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
-
-// def DevelopersRecipientProvider 
-
 def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
     props.put("smtp.gmail.com", host)
@@ -36,7 +21,6 @@ def sendMail(host, sender, receivers, subject, text) {
     Transport.send(message)
     println 'Mail sent.'
 }
-
 
 
 pipeline 
@@ -111,10 +95,19 @@ pipeline
                }
             }
 
-           stage('Notification') {
+           stage('Notification : Send Email') {
                steps {
                     echo "Email Notification "
-               }
+                    def mailRecipients = "loganathr21@gmail.com"
+                    def jobName = currentBuild.fullDisplayName
+
+                    emailext body: '''${SCRIPT, template="groovy-html.template"}''',
+                    mimeType: 'text/html',
+                    subject: "[Jenkins] ${jobName}",
+                    to: "${mailRecipients}",
+                    replyTo: "${mailRecipients}",
+                    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+                }
             }
        }
 
@@ -129,24 +122,18 @@ pipeline
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
 
             // send to email
-             emailext (
-                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
-             }
         
         success {
             echo "The job is successful"
            
-            // send to email
+            /*  send to email
            emailext (
                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
-            }        
-      }
+            }  */
+        }
 
 }  // end pipeline
 
