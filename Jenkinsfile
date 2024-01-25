@@ -25,8 +25,7 @@ def sendMail(host, sender, receivers, subject, text) {
 }
 
 pipeline 
-
-{ // begin pipeline
+{ 
     agent any
     
     tools {
@@ -110,6 +109,7 @@ pipeline
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                 }
             }
+       }
     
     post 
     {
@@ -132,6 +132,4 @@ pipeline
                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
             }  */
           }
-     } // end of post 
- 
-}  // end pipeline
+     } 
