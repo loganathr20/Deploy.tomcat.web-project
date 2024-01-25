@@ -121,6 +121,7 @@ pipeline
                     to: "${mailRecipients}",
                     replyTo: "${mailRecipients}",
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+                    
                  }
             }
           }
