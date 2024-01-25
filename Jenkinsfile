@@ -4,8 +4,6 @@ import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
 
-def envVars = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars() 
-println envVars['myVar']
     
 // def manager = "manager" // probably not what you want
 // def result = manager.build.result
@@ -13,8 +11,8 @@ println envVars['myVar']
 //def environment = manager.getEnvVars()
 //def buildNumber = manager.build.number
 
-echo " Job Name: ${environment.JOB_NAME} "
-echo " Build Number: ${environment.BUILD_NUMBER} " 
+// echo " Job Name: ${environment.JOB_NAME} "
+// echo " Build Number: ${environment.BUILD_NUMBER} " 
 
 // def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
 //def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
@@ -127,13 +125,26 @@ pipeline
         
         failure {
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
-           //  sendMail('smtp.gmail.com', "loganathr21@gmail.comm", "loganathr21@gmail.com", "APPID>>${subject}", "${body}")
-        }
+
+            // send to email
+             emailext (
+                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+             }
         
         success {
             echo "The job is successful"
-            // archiveArtifacts artifacts: 'archiveArtifacts artifacts: \'target/*.jar, target/*.war\'', followSymlinks: false, onlyIfSuccessful: true
-            //  sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+           
+            // send to email
+           emailext (
+               subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+               body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+               recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
+            
         }        
     }
 
