@@ -2,20 +2,22 @@
 
 import javax.mail.*
 import javax.mail.internet.*
+import jenkins.model.Jenkins
 
+def envVars = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars() 
+println envVars['myVar']
+    
 // def manager = "manager" // probably not what you want
-
-
 // def result = manager.build.result
 // manager.listener.logger.println "And the result is: ${result}"
-def environment = manager.getEnvVars()
-def buildNumber = manager.build.number
+//def environment = manager.getEnvVars()
+//def buildNumber = manager.build.number
 
 echo " Job Name: ${environment.JOB_NAME} "
 echo " Build Number: ${environment.BUILD_NUMBER} " 
 
 // def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
-def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
+//def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
 
 def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
