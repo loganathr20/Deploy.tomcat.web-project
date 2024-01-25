@@ -17,6 +17,8 @@ import jenkins.model.Jenkins
 // def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
 //def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
 
+// def DevelopersRecipientProvider 
+
 def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
     props.put("smtp.gmail.com", host)
@@ -142,7 +144,7 @@ pipeline
                subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                 <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-               recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
+               recipientProviders: [[$class: 'loganathr21@gmail.com']] )
             }        
       }
 
