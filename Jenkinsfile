@@ -1,26 +1,10 @@
 
 
-
 import javax.mail.*
 import javax.mail.internet.*
-// import hudson.model.*
 
-// Binding binding = new Binding();
-// binding.setVariable("manager", manager);
+// def manager = "manager" // probably not what you want
 
-def manager = "manager" // probably not what you want
-
-/* 
-def build = Thread.currentThread().executable
-def result = "And the result is: " 
-def BUILD_NUMBER = build.number
-def JOB_NAME = job.name
-def BUILD_URL=build.url  
-
-def body = "Job Name: ${JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${BUILD_URL} "  + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins"
-def subject = " ${JOB_NAME}>> ${BUILD_NUMBER} >> ${result} "
-
-*/
 
 def result = manager.build.result
 // manager.listener.logger.println "And the result is: ${result}"
@@ -31,7 +15,6 @@ echo " Build Number: ${environment.BUILD_NUMBER} "
 
 // def body = "Job Name: ${environment.JOB_NAME} " + System.getProperty("line.separator") + " Build Number: ${environment.BUILD_NUMBER} " + System.getProperty("line.separator") + " Build Status: ${result} " + System.getProperty("line.separator") + " DEPLOYMENT INFORMATION: Check Deployment Console Output at ${environment.BUILD_URL} " + System.getProperty("line.separator") + " Disclaimer: Please do not reply to this email as this is an auto-generated email from Jenkins" 
 def subject = " ${environment.JOB_NAME}>> ${environment.BUILD_NUMBER} >> ${result} "
-
 
 def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
@@ -142,45 +125,12 @@ pipeline
         failure {
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
            //  sendMail('smtp.gmail.com', "loganathr21@gmail.comm", "loganathr21@gmail.com", "APPID>>${subject}", "${body}")
-
-        /*    mail to: "loganathr21@gmail.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Boo, we failed."
-             mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
-             emailext (
-                   subject: "FAILURE Notification : Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                   body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                   <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-                   recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                )
-            */
         }
         
         success {
             echo "The job is successful"
             // archiveArtifacts artifacts: 'archiveArtifacts artifacts: \'target/*.jar, target/*.war\'', followSymlinks: false, onlyIfSuccessful: true
-            
-            // mail to: "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
-
-//             sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
-
-
-
-         //   sendMail('smtp.gmail.com', "loganathr21@gmail.comm", "loganathr21@gmail.com", "APPID>>${subject}", "${body}")
-
-                      
-//             sendMail('mailhost', messageSender, messageReceivers, messageSubject, messageAllText)
-/*
-             mail to: 'loganathr21@gmail.com',
-                 subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
-                 body: "Please go to ${env.BUILD_URL}."
-           
-                emailext (
-                   subject: "SUCCESSFUL Notification : Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                   body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                   <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-                   recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                )
-            */
-
+            //  sendmail('smtp.gmail.com', "loganathr21@gmail.com", "loganathr21@gmail.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
         }        
     }
 
