@@ -11,9 +11,11 @@ def sendMail(host, sender, receivers, subject, text) {
 
     MimeMessage message = new MimeMessage(session)
     message.setFrom(new InternetAddress(sender))
-    receivers.split(',').each {
+    receivers.split(',').each 
+    {
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(it))
     }
+
     message.setSubject(subject)
     message.setText(text)
 
@@ -21,7 +23,6 @@ def sendMail(host, sender, receivers, subject, text) {
     Transport.send(message)
     println 'Mail sent.'
 }
-
 
 pipeline 
 
@@ -130,5 +131,6 @@ pipeline
                recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
             }  */
          }
-    } // end of post 
+     } // end of post 
 }  // end pipeline
+}
