@@ -5,6 +5,9 @@ import javax.mail.*
 import javax.mail.internet.*
 // import hudson.model.*
 
+Binding binding = new Binding();
+binding.setVariable("manager", manager);
+
 def manager = "my manager" // probably not what you want
 
 /* 
@@ -137,7 +140,7 @@ pipeline
 
         
         failure {
-            echo "sendmail -s mvn build failed loganathr21@gmail.com "
+            // echo "sendmail -s mvn build failed loganathr21@gmail.com "
            //  sendMail('smtp.gmail.com', "loganathr21@gmail.comm", "loganathr21@gmail.com", "APPID>>${subject}", "${body}")
 
         /*    mail to: "loganathr21@gmail.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Boo, we failed."
