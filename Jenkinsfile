@@ -99,8 +99,8 @@ pipeline
            stage('Notification : Send Email') {
                steps {
                     echo "Email Notification "
-                    def mailRecipients = "loganathr21@gmail.com"
-                    def jobName = currentBuild.fullDisplayName
+                    mailRecipients = "loganathr21@gmail.com"
+                    jobName = currentBuild.fullDisplayName
 
                     emailext body: '''${SCRIPT, template="groovy-html.template"}''',
                     mimeType: 'text/html',
@@ -112,9 +112,10 @@ pipeline
             }
     
     post {
-        always{
-            deleteDir()
-        }
+        
+         always{
+             deleteDir()
+          }
         
         failure {
              echo "sendmail -s mvn build failed loganathr21@gmail.com "
@@ -133,4 +134,3 @@ pipeline
          }
      } // end of post 
 }  // end pipeline
-}
