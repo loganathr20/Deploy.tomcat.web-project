@@ -8,7 +8,7 @@ import javax.mail.internet.*
 // Binding binding = new Binding();
 // binding.setVariable("manager", manager);
 
-def manager = "my manager" // probably not what you want
+def manager = "manager" // probably not what you want
 
 /* 
 def build = Thread.currentThread().executable
