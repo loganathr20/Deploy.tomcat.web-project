@@ -108,12 +108,8 @@ pipeline
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
                          
-                    // File sourceFile = new File("/var/lib/jenkins/email-templates/jive-formatter.groovy");
-                    // Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);
-                    // GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
-                    
-                    emailext body: '''${SCRIPT, template="groovy-html.template"}''',
-                    // emailext body: '''${SCRIPT, template="t2.template"}''',
+                    // emailext body: '''${SCRIPT, template="groovy-html.template"}''',
+                    emailext body: '''${SCRIPT, template="t2.template"}''',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
