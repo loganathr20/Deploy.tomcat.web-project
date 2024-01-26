@@ -4,7 +4,7 @@ import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
 
-def sendMail(host, sender, receivers, subject, text) {
+/* def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
     props.put("smtp.gmail.com", host)
     Session session = Session.getDefaultInstance(props, null)
@@ -22,7 +22,7 @@ def sendMail(host, sender, receivers, subject, text) {
     println 'Sending mail to ' + receivers + '.'
     Transport.send(message)
     println 'Mail sent.'
-}
+} */
 
 // Jive Formater
 
@@ -369,8 +369,8 @@ pipeline
                 script {
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
-                    // emailext body: '''${SCRIPT, template="groovy-html.template"}''',
-                    emailext body: '''${SCRIPT, template="t2.template"}''',
+                     emailext body: '''${SCRIPT, template="groovy-html.template"}''',
+                    // emailext body: '''${SCRIPT, template="t2.template"}''',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
