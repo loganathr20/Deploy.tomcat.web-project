@@ -34,38 +34,44 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 { 
     agent any
-    // test 
-    
-    tools {
-        maven 'mvn'
-    }
-    
-    options {
-        timeout(50)
-        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '2', numToKeepStr: '2')
+    // test
 
+
+    t// test2
+
+
+/* def sendMail(host, sender, receivers, subject, text) {
+    Properties props = System.getProperties()
+    props.put("smtp.gmail.com", host)
+    Session session = Session.getDefaultInstance(props, null)
+
+    MimeMessage message = new MimeMessage(session)
+    message.setFrom(new InternetAddress(sender))
+    receivers.split(',').each 
+    {
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(it))
     }
-    
-    stages 
-       {
-           stage('Configurations ') {
-               steps {
-                    echo " Prebuild action "
-                    echo  ' JAVA_HOME is $env.JAVA_HOME '
-                    echo ' M2_HOME is $env.M2_HOME '
-                    echo ' JENKINS_HOME is $env.JENKINS_HOME '
-                    echo ' ANT_HOME is $env.ANT_HOME '
-               }
-           }
-             
-           stage('Pre-Build ') {
-               steps {
-                    echo " Prebuild action "
-                    echo  ' JAVA_HOME is $JAVA_HOME '
-                    echo ' M2_HOME is $M2_HOME '
-                    echo ' JENKINS_HOME is $JENKINS_HOME '
-                    echo ' ANT_HOME is $ANT_HOME '
-               }
+
+    message.setSubject(subject)
+    message.setText(text)
+
+    println 'Sending mail to ' + receivers + '.'
+    Transport.send(message)
+    println 'Mail sent.'
+} */
+
+File sourceFile = new File("/var/lib/jenkins/email-templates/jive-formatter.groovy");
+Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);
+GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
+                    
+
+pipeline 
+{ 
+    agent any
+    //34534343
+
+    // h324324
+    // test 
            }
            
            stage('Build ') {
