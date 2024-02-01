@@ -3,6 +3,7 @@
 import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
+// test
 
 /* def sendMail(host, sender, receivers, subject, text) {
     Properties props = System.getProperties()
