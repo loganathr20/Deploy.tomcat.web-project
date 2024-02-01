@@ -34,6 +34,7 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 { 
     agent any
+    // test 
     
     tools {
         maven 'mvn'
