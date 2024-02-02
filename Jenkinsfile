@@ -11,11 +11,12 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
                     
 
 pipeline 
-{ 
-   stages {
+{
 
+   stages 
+    {
            agent any 
-           
+
            stage('Build ') {
                steps {
                     sh "mvn clean install"
@@ -45,14 +46,12 @@ pipeline
                }
             }
 
-           
            stage('Sanity Check') {
                steps {
                     echo " Sanity Check action"
                }
             }
 
-           
            stage('Notifications : Send Email') {
              steps {
                 script {
@@ -67,9 +66,10 @@ pipeline
                  }
               }
             }
-           
-       }  // end of stages
-    
+
+
+     }  // end of stages
+
     post 
     {
          always{
@@ -87,5 +87,4 @@ pipeline
     }  // end of post
  
 }  // end of pipeline
-
 
