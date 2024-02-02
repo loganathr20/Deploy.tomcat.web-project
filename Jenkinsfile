@@ -1,5 +1,4 @@
 
-
 import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
@@ -13,7 +12,7 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 
 pipeline 
 { 
-           agent any {}
+           agent any 
            
            stage('Build ') {
                steps {
@@ -57,17 +56,15 @@ pipeline
                 script {
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
-                         
                     emailext body: '''${SCRIPT, template="groovy-html.template"}''',
-                    // emailext body: '''${SCRIPT, template="t2.template"}''',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
                     replyTo: "${mailRecipients}",
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                  }
-             }
-           }
+              }
+            }
            
        }  // end of stages
     
@@ -84,16 +81,9 @@ pipeline
         
         success {
             echo "The job is successful"
-            /*  send to email
-            emailext (
-               subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-               body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-               recipientProviders: [[$class: 'DevelopersRecipientProvider']] )
-            }  */
           }
-     } // end of post
+    }  // end of post
  
- }  // end of pipeline
+}  // end of pipeline
 
 
