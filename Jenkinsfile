@@ -12,6 +12,8 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 
 pipeline 
 { 
+   stages {
+
            agent any 
            
            stage('Build ') {
