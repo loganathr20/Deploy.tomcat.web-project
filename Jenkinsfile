@@ -3,28 +3,8 @@
 import javax.mail.*
 import javax.mail.internet.*
 import jenkins.model.Jenkins
-// test2
 
 
-/* def sendMail(host, sender, receivers, subject, text) {
-    Properties props = System.getProperties()
-    props.put("smtp.gmail.com", host)
-    Session session = Session.getDefaultInstance(props, null)
-
-    MimeMessage message = new MimeMessage(session)
-    message.setFrom(new InternetAddress(sender))
-    receivers.split(',').each 
-    {
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(it))
-    }
-
-    message.setSubject(subject)
-    message.setText(text)
-
-    println 'Sending mail to ' + receivers + '.'
-    Transport.send(message)
-    println 'Mail sent.'
-} */
 
 File sourceFile = new File("/var/lib/jenkins/email-templates/jive-formatter.groovy");
 Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);
@@ -34,45 +14,6 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 { 
     agent any
-    // test
-
-
-    t// test2
-
-
-/* def sendMail(host, sender, receivers, subject, text) {
-    Properties props = System.getProperties()
-    props.put("smtp.gmail.com", host)
-    Session session = Session.getDefaultInstance(props, null)
-
-    MimeMessage message = new MimeMessage(session)
-    message.setFrom(new InternetAddress(sender))
-    receivers.split(',').each 
-    {
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(it))
-    }
-
-    message.setSubject(subject)
-    message.setText(text)
-
-    println 'Sending mail to ' + receivers + '.'
-    Transport.send(message)
-    println 'Mail sent.'
-} */
-
-File sourceFile = new File("/var/lib/jenkins/email-templates/jive-formatter.groovy");
-Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);
-GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
-                    
-
-pipeline 
-{ 
-    agent any
-    //34534343
-
-    // h324324
-    // test 
-           }
            
            stage('Build ') {
                steps {
