@@ -13,7 +13,7 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 
 pipeline 
 { 
-    agent any
+           agent any {}
            
            stage('Build ') {
                steps {
@@ -66,8 +66,8 @@ pipeline
                     replyTo: "${mailRecipients}",
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                  }
-            }
-          }
+             }
+           }
            
        }  // end of stages
     
@@ -93,6 +93,7 @@ pipeline
             }  */
           }
      } // end of post
+ 
  }  // end of pipeline
 
 

@@ -10,20 +10,23 @@
   <description>A very simple Maven-enabled WAR web project</description>
 
   <dependencies>
-  	<dependency>
-  		<groupId>com.google.code.gson</groupId>
-  		<artifactId>gson</artifactId>
-  		<version>2.3.1</version>
-  	</dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
+    </dependency>
+    
   	<dependency>
   		<groupId>javax.ws.rs</groupId>
   		<artifactId>javax.ws.rs-api</artifactId>
-  		<version>2.3.1</version>
+  		<version>2.0.1</version>
   		<scope>provided</scope>
   	</dependency>
   </dependencies>
 
   <build>
+
     <plugins>
 
       <plugin>
