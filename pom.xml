@@ -24,7 +24,6 @@
   </dependencies>
 
   <build>
-git config --global -e git config --global -e 
     <plugins>
 
       <plugin>
