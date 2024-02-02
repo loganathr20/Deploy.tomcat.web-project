@@ -13,10 +13,11 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 {
 
+   agent any 
+   
    stages 
     {
-           agent any 
-
+ 
            stage('Build ') {
                steps {
                     sh "mvn clean install"
