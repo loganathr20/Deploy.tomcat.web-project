@@ -13,8 +13,7 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 {
 
-// devekio
-
+// feature 2
    
    agent any 
    
