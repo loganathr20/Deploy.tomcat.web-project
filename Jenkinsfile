@@ -13,7 +13,7 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 pipeline 
 {
 
-// feature 2
+// develop
    
    agent any 
    
@@ -77,7 +77,9 @@ pipeline
           }
                 
         success {
+            
             // Send email notification for build success
+            
             echo "The job is successful"
         
             /* emailext (
@@ -115,3 +117,4 @@ pipeline
     }  // end of post
  
 }  // end of pipeline
+
