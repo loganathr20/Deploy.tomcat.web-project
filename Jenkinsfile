@@ -89,7 +89,8 @@ pipeline
            script {
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
-                    emailext body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} \n\n " '${SCRIPT, template="groovy-html.template"}'
+                    emailext body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} \n\n "
+                    emailext body: '${SCRIPT, template="groovy-html.template"}',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
