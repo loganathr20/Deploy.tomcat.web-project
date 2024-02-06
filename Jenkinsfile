@@ -53,7 +53,7 @@ pipeline
                }
             }
 
-           stage('Notifications : Send Email') {
+         /*  stage('Notifications : Send Email') {
              steps {
                 script {
                     def mailRecipients = 'loganathr21@gmail.com'
@@ -66,7 +66,7 @@ pipeline
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                  }
               }
-            }
+            } */ 
      }  // end of stages
 
     post 
@@ -84,6 +84,19 @@ pipeline
                 body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}",
                 to: "loganathr21@gmail.com",
             )
+
+           script {
+                    def mailRecipients = 'loganathr21@gmail.com'
+                    def jobName = currentBuild.fullDisplayName
+                    emailext body: '''${SCRIPT, template="groovy-html.template"}''',
+                    mimeType: 'text/html',
+                    subject: "[Jenkins] ${jobName}",
+                    to: "${mailRecipients}",
+                    replyTo: "${mailRecipients}",
+                    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+                 }
+              }
+
           }
         failure {
             // Send email notification for build failure
