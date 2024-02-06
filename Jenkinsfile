@@ -94,7 +94,7 @@ pipeline
                     
                     // emailext body: '${SCRIPT, template="groovy-html.template"}',
 
-                    emailext body: '${SCRIPT, template="html-with-health-and-console.jelly"}',
+                    emailext body: '${SCRIPT, template="groovy-html-larry.template"}',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
