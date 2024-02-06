@@ -96,7 +96,7 @@ pipeline
                     
                     // emailext body: ''${SCRIPT, template="groovy-html.template"}' Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} \n',
                     
-                    emailext body: ''${SCRIPT, template="groovy-html.template"}'',
+                    emailext body: '${SCRIPT, template="groovy-html.template"}',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
