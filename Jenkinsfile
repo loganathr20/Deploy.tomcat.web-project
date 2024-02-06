@@ -67,6 +67,7 @@ pipeline
                  }
               }
             } */ 
+
      }  // end of stages
 
     post 
@@ -88,7 +89,7 @@ pipeline
            script {
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
-                    emailext body: '''${SCRIPT, template="groovy-html.template"}''',
+                    emailext body: ''${SCRIPT, template="groovy-html.template"}'',
                     mimeType: 'text/html',
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
