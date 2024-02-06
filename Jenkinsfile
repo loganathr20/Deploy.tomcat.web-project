@@ -27,7 +27,6 @@ pipeline
                }
            }
 
-
           stage('Unit Testing') {
                steps {
                     echo "  Test Phase "
@@ -39,7 +38,6 @@ pipeline
                     echo "  Deploy Phase "
                }
            }
-
 
            stage('Restart Servers') {
                steps {
@@ -69,8 +67,6 @@ pipeline
                  }
               }
             }
-
-
      }  // end of stages
 
     post 
@@ -78,16 +74,28 @@ pipeline
          always{
              deleteDir()
           }
-        
-        failure {
-             echo "sendmail -s mvn build failed loganathr21@gmail.com "
-            // send to email
-         }
-        
+                
         success {
+            // Send email notification for build success
             echo "The job is successful"
+        
+            emailext (
+                subject: "Jenkins Build Success: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}",
+                to: "recipient@example.com",
+            )
           }
+        failure {
+            // Send email notification for build failure
+            echo "The job failed"
+        
+            emailext (
+                subject: "Jenkins Build Failure: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "The Jenkins build job ${env.JOB_NAME} has failed.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}\n\nConsole Output:\n${currentBuild.rawBuild.getLog(100)}",
+                to: "recipient@example.com",
+            )
+           }
+
     }  // end of post
  
 }  // end of pipeline
-
