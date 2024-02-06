@@ -85,11 +85,13 @@ pipeline
                 to: "loganathr21@gmail.com",
             ) */
 
+   //              mimeType: 'text/html',
+   
+
            script {
                     def mailRecipients = 'loganathr21@gmail.com'
                     def jobName = currentBuild.fullDisplayName
-                    emailext body: '${SCRIPT, template="groovy-html.template"}', "/n /n The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} "
-                    mimeType: 'text/html',
+                    emailext body: '${SCRIPT, template="groovy-html.template"}', " /n /n The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} "
                     subject: "[Jenkins] ${jobName}",
                     to: "${mailRecipients}",
                     replyTo: "${mailRecipients}",
