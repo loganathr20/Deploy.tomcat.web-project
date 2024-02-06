@@ -79,11 +79,11 @@ pipeline
             // Send email notification for build success
             echo "The job is successful"
         
-            emailext (
+            /* emailext (
                 subject: "Jenkins Build Success: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
                 body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL}",
                 to: "loganathr21@gmail.com",
-            )
+            ) */
 
            script {
                     def mailRecipients = 'loganathr21@gmail.com'
