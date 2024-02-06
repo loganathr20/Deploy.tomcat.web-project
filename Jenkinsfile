@@ -95,9 +95,8 @@ pipeline
                     replyTo: "${mailRecipients}",
                     recipientProviders: [[$class: 'CulpritsRecipientProvider']]
                  }
-              }
-
           }
+
         failure {
             // Send email notification for build failure
             echo "The job failed"
