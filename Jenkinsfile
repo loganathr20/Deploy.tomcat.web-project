@@ -82,7 +82,7 @@ pipeline
             emailext (
                 subject: "Jenkins Build Success: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
                 body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}",
-                to: "loganathr@gmail.com",
+                to: "loganathr21@gmail.com",
             )
           }
         failure {
@@ -92,7 +92,7 @@ pipeline
             emailext (
                 subject: "Jenkins Build Failure: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
                 body: "The Jenkins build job ${env.JOB_NAME} has failed.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}\n\nConsole Output:\n${currentBuild.rawBuild.getLog(100)}",
-                to: "loganathr@gmail.com",
+                to: "loganathr21@gmail.com",
             )
            }
 
