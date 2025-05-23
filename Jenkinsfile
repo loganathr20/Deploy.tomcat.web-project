@@ -86,7 +86,7 @@ pipeline {
                     // sh 'cp target/dtw-1.0.0.war /opt/tomcat/webapps/'
                     // 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
 
-                    // sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
+                     sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
                     //   sh 'docker build -t your-app .'
                     //   sh 'docker push your-registry/your-app'
@@ -100,7 +100,7 @@ pipeline {
                     // Requires "Publish Over SSH" plugin installed and configured in Jenkins global settings.
                     // You need to define SSH Servers under "Manage Jenkins" -> "Configure System" -> "Publish over SSH".
                     // This example configures deployment to a Tomcat server's webapps directory.
-                    sshPublisher(publishers: [
+                    /* sshPublisher(publishers: [
                         sshPublisherDesc(
                             configName: 'LinuxMint-Thinkcentre', // IMPORTANT: Name configured in Jenkins global settings for your Tomcat server
                             transfers: [
@@ -123,6 +123,7 @@ pipeline {
                     // withCredentials([sshUserPrivateKey(credentialsId: 'your-ssh-credential-id', keyFileVariable: 'SSH_KEY')]) {
                     //     sh "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no user@your-server 'sudo systemctl restart your-app-service'"
                     // }
+                    */
 
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
