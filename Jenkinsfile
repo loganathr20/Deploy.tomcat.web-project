@@ -100,7 +100,10 @@ pipeline {
                     //   sh 'ssh user@your-server "sudo systemctl restart your-app-service"'
                     // - Calling a management API or script.
                     // 'ssh lraja@LinuxMint-Thinkcentre "sudo systemctl restart tomcat"'
-                     'sh "sudo systemctl restart tomcat"'
+                    sh 'sudo systemctl restart tomstatus"'
+                    sh 'sudo systemctl restart tomcat"'
+                    sh 'sudo systemctl restart tomstatus"'
+                    
                     echo 'Servers restarted. (Placeholder for actual restart steps)'
                 }
             }
