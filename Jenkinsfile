@@ -41,6 +41,7 @@ pipeline {
                     // For Maven: 'mvn clean install -DskipTests' to build without running tests yet.
                     // For Gradle: 'gradle clean build -x test'
                     sh "${BUILD_TOOL_CMD} clean install -DskipTests"
+                    archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
                     echo 'Java project built successfully.'
                 }
             }
