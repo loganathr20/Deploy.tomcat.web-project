@@ -75,6 +75,7 @@ pipeline {
                     // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:~'
                     // sh 'ssh lraja@LinuxMint-Thinkcentre'
                     // 'sudo mv ~/dtw-1.0.0.war /opt/tomcat/webapps/'
+                     sh 'scp target/dtw-1.0.0.war /opt/tomcat/webapps/'
                     
                     // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
@@ -100,10 +101,10 @@ pipeline {
                     //   sh 'ssh user@your-server "sudo systemctl restart your-app-service"'
                     // - Calling a management API or script.
                     // 'ssh lraja@LinuxMint-Thinkcentre "sudo systemctl restart tomcat"'
-                    sh 'sudo systemctl restart tomstatus"'
-                    sh 'sudo systemctl restart tomcat"'
-                    sh 'sudo systemctl restart tomstatus"'
-                    
+                    sh 'sudo systemctl restart tomstatus'
+                    sh 'sudo systemctl restart tomcat'
+                    sh 'sudo systemctl restart tomstatus'
+
                     echo 'Servers restarted. (Placeholder for actual restart steps)'
                 }
             }
