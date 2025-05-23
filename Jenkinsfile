@@ -102,10 +102,8 @@ pipeline {
                                      removePrefix: 'target/'
                                  )
                              ],
-                    //     )
-                    // ])
-
-                    echo 'Application deployed. (Placeholder for actual deployment steps)'
+                    
+                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
         }
