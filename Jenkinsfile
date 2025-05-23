@@ -1,122 +1,159 @@
 
-import javax.mail.*
-import javax.mail.internet.*
-import jenkins.model.Jenkins
 
+// Jenkins Pipeline script for a Java project
+// This script defines a series of stages for building, testing, and deploying a Java application.
 
+pipeline {
+    // Agent definition: 'any' means Jenkins will allocate an executor on any available agent.
+    // You can specify a label here (e.g., agent { label 'my-java-agent' }) if you have specific agents.
+    agent any
 
-File sourceFile = new File("/var/lib/jenkins/email-templates/jive-formatter.groovy");
-Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);
-GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
-                    
+    // Environment variables that can be used throughout the pipeline.
+    environment {
+        // Example: MAVEN_HOME = tool 'Maven 3.8.6' // If using Maven from Jenkins tools configuration
+        // You might define paths to build tools, deployment targets, etc.
+        JAVA_HOME = tool 'JDK 11' // Assuming you have a JDK 11 configured in Jenkins Global Tool Configuration
+        // Define your build tool command here, e.g., 'mvn' for Maven or 'gradle' for Gradle
+        BUILD_TOOL_CMD = 'mvn'
+    }
 
-pipeline 
-{
-
-// develop
-   
-   agent any 
-   
-   stages 
-    {
- 
-           stage('Build ') {
-               steps {
-                    sh "mvn clean install"
-                    archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
-               }
-           }
-
-          stage('Unit Testing') {
-               steps {
-                    echo "  Test Phase "
-               }
-           }
-
-           stage('Deployment') {
-               steps {
-                    echo "  Deploy Phase "
-               }
-           }
-
-           stage('Restart Servers') {
-               steps {
-                    echo "  Restart Servers  Phase "
-                   /*  sh '/opt/tomcat/bin/shutdown.sh'
-                    sh '/opt/tomcat/bin/startup.sh' */
-                    // temp 
-                    
-               }
-            }
-
-           stage('Sanity Check') {
-               steps {
-                    echo " Sanity Check action"
-               }
-            }
-
-         /*  stage('Notifications : Send Email') {
-             steps {
+    // Stages define the main steps of your pipeline.
+    stages {
+        // Stage 1: Checkout SCM (Source Code Management)
+        stage('Checkout SCM') {
+            steps {
                 script {
-                    def mailRecipients = 'loganathr21@gmail.com'
-                    def jobName = currentBuild.fullDisplayName
-                    emailext body: '''${SCRIPT, template="groovy-html.template"}''',
-                    mimeType: 'text/html',
-                    subject: "[Jenkins] ${jobName}",
-                    to: "${mailRecipients}",
-                    replyTo: "${mailRecipients}",
-                    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
-                 }
-              }
-            } */ 
+                    echo 'Checking out source code from SCM...'
+                    // 'checkout scm' checks out the code configured in the Jenkins job's SCM settings.
+                    // For Git, this would pull the repository.
+                    checkout scm
+                    echo 'Source code checked out successfully.'
+                }
+            }
+        }
 
-     }  // end of stages
+        // Stage 2: Build the Java Project
+        stage('Build') {
+            steps {
+                script {
+                    echo 'Starting Java project build...'
+                    // Execute the build command.
+                    // For Maven: 'mvn clean install -DskipTests' to build without running tests yet.
+                    // For Gradle: 'gradle clean build -x test'
+                    sh "${BUILD_TOOL_CMD} clean install -DskipTests"
+                    echo 'Java project built successfully.'
+                }
+            }
+        }
 
-    post 
-    {
-         always{
-             deleteDir()
-          }
-                
+        // Stage 3: Run Unit Tests
+        stage('Unit Testing') {
+            steps {
+                script {
+                    echo 'Running unit tests...'
+                    // Execute unit tests.
+                    // For Maven: 'mvn test' or part of 'mvn install' if not skipped in build stage.
+                    // For Gradle: 'gradle test'
+                    sh "${BUILD_TOOL_CMD} test"
+                    echo 'Unit tests completed.'
+                    // You might want to publish test results here, e.g.:
+                    // junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        // Stage 4: Deployment
+        stage('Deployment') {
+            steps {
+                script {
+                    echo 'Starting deployment process...'
+                    // *** CUSTOMIZE THIS SECTION ***
+                    // This is a placeholder for your actual deployment logic.
+                    // Examples:
+                    // - Copy WAR/JAR to application server:
+                    //   sh 'scp target/your-app.war user@your-server:/path/to/webapps/'
+                    // - Deploy to a container (e.g., Docker, Kubernetes):
+                    //   sh 'docker build -t your-app .'
+                    //   sh 'docker push your-registry/your-app'
+                    //   kubernetesDeploy() // If using Kubernetes plugin
+                    // - Deploy using a specific tool (e.g., Ansible, Chef, Puppet)
+                    //   sh 'ansible-playbook deploy.yml'
+                    echo 'Application deployed. (Placeholder for actual deployment steps)'
+                }
+            }
+        }
+
+        // Stage 5: Restart Servers
+        stage('Restart Servers') {
+            steps {
+                script {
+                    echo 'Restarting application servers...'
+                    // *** CUSTOMIZE THIS SECTION ***
+                    // This is a placeholder for server restart logic.
+                    // Examples:
+                    // - SSH command to restart a service:
+                    //   sh 'ssh user@your-server "sudo systemctl restart your-app-service"'
+                    // - Calling a management API or script.
+                    echo 'Servers restarted. (Placeholder for actual restart steps)'
+                }
+            }
+        }
+
+        // Stage 6: Sanity Check
+        stage('Sanity Check') {
+            steps {
+                script {
+                    echo 'Performing sanity checks on the deployed application...'
+                    // *** CUSTOMIZE THIS SECTION ***
+                    // This is a placeholder for post-deployment sanity checks.
+                    // Examples:
+                    // - Hit a health check endpoint:
+                    //   sh 'curl -f http://your-app-url/health || exit 1'
+                    // - Check logs for specific messages:
+                    //   sh 'ssh user@your-server "grep -q \'Application started\' /var/log/your-app.log"'
+                    echo 'Sanity checks completed. Application is up and running. (Placeholder)'
+                }
+            }
+        }
+
+        // Stage 7: Post Actions (e.g., notifications, archiving artifacts)
+        stage('Post Actions') {
+            steps {
+                script {
+                    echo 'Executing post-build actions...'
+                    // You can archive build artifacts
+                    // archiveArtifacts artifacts: 'target/*.jar, target/*.war', fingerprint: true
+                    echo 'Post actions completed.'
+                }
+            }
+        }
+    }
+
+    // Post-build actions that run after all stages have completed,
+    // regardless of whether the build succeeded or failed.
+    post {
+        // Always runs
+        always {
+            echo 'Pipeline finished. Cleaning up workspace...'
+            // cleanWs() // Cleans up the workspace on the agent
+        }
+        // Runs only if the build succeeded
         success {
-            
-            // Send email notification for build success
-            
-            echo "The job is successful"
-        
-            /* emailext (
-                subject: "Jenkins Build Success: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL}",
-                to: "loganathr21@gmail.com",
-            ) */
-
-           script {
-                    def mailRecipients = 'loganathr21@gmail.com'
-                    def jobName = currentBuild.fullDisplayName
-                    
-                    // emailext body: "The Jenkins build job ${env.JOB_NAME} has completed successfully.\n\n Commit: ${env.GIT_COMMIT} \n\n Build URL: ${env.BUILD_URL} \n\n "
-                    
-                    emailext body: '${SCRIPT, template="groovy-html.template"}',
-                    mimeType: 'text/html',
-                    subject: "[Jenkins] ${jobName}",
-                    to: "${mailRecipients}",
-                    replyTo: "${mailRecipients}",
-                    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
-                 }
-          }
-
+            echo 'Build and deployment succeeded! Sending success notification...'
+            // mail to: 'devs@example.com',
+            //      subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
+        }
+        // Runs only if the build failed
         failure {
-            // Send email notification for build failure
-            echo "The job failed"
-        
-            emailext (
-                subject: "Jenkins Build Failure: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                body: "The Jenkins build job ${env.JOB_NAME} has failed.\n\nCommit: ${env.GIT_COMMIT}\n\nBuild URL: ${env.BUILD_URL}\n\nConsole Output:\n${currentBuild.rawBuild.getLog(100)}",
-                to: "loganathr21@gmail.com",
-            )
-           }
+            echo 'Build or deployment failed! Sending failure notification...'
+            // mail to: 'devs@example.com',
+            //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
+        }
+    }
+}
 
-    }  // end of post
- 
-}  // end of pipeline
+
+
 
