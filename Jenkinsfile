@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     echo 'Starting deployment process...'
-                    // *** CUSTOMIZE THIS SECTION ***
+                    // *** CUSTOMIZE THIS SECTION ***  OPTION 1
                     // This is a placeholder for your actual deployment logic.
                     // Examples:
                     // - Copy WAR/JAR to application server:
@@ -78,13 +78,33 @@ pipeline {
                     // sh 'cp target/dtw-1.0.0.war /opt/tomcat/webapps/'
                     // 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
 
-                     sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
+                    // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
                     //   sh 'docker build -t your-app .'
                     //   sh 'docker push your-registry/your-app'
                     //   kubernetesDeploy() // If using Kubernetes plugin
                     // - Deploy using a specific tool (e.g., Ansible, Chef, Puppet)
                     //   sh 'ansible-playbook deploy.yml'
+
+
+                    // Option 2: Recommended - Using 'publishOverSsh' (SSH Publisher Plugin)
+                    // This plugin simplifies file transfers and command execution over SSH.
+                    // Requires "Publish Over SSH" plugin installed and configured in Jenkins global settings.
+                    // You need to define SSH Servers under "Manage Jenkins" -> "Configure System" -> "Publish over SSH".
+                    // Example:
+                     sshPublisher(publishers: [
+                         sshPublisherDesc(
+                             configName: 'LinuxMint-Thinkcentre', // Name configured in Jenkins global settings
+                             transfers: [
+                                 sshTransfer(
+                                     sourceFiles: 'target/dtw-1.0.0.war',
+                                     remoteDirectory: '/opt/tomcat/webapps/',
+                                     removePrefix: 'target/'
+                                 )
+                             ],
+                    //     )
+                    // ])
+
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
