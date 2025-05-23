@@ -86,28 +86,9 @@ pipeline {
                     // - Deploy using a specific tool (e.g., Ansible, Chef, Puppet)
                     //   sh 'ansible-playbook deploy.yml'
 
-
-                    // Option 2: Recommended - Using 'publishOverSsh' (SSH Publisher Plugin)
-                    // This plugin simplifies file transfers and command execution over SSH.
-                    // Requires "Publish Over SSH" plugin installed and configured in Jenkins global settings.
-                    // You need to define SSH Servers under "Manage Jenkins" -> "Configure System" -> "Publish over SSH".
-                    // Example:
-                     sshPublisher(publishers: [
-                         sshPublisherDesc(
-                             configName: 'LinuxMint-Thinkcentre', // Name configured in Jenkins global settings
-                             transfers: [
-                                 sshTransfer(
-                                     sourceFiles: 'target/dtw-1.0.0.war',
-                                     remoteDirectory: '/opt/tomcat/webapps/',
-                                     removePrefix: 'target/'
-                                 )
-                             ]
-                         )
-                       ]
-           
-                   // echo 'Application deployed. (Placeholder for actual deployment steps)'
-                   
-           }    
+             echo 'Application deployed. (Placeholder for actual deployment steps)'
+                }
+            }    
 	}
 
    // Stage 5: Restart Servers
