@@ -12,7 +12,7 @@ pipeline {
     environment {
         // Example: MAVEN_HOME = tool 'Maven 3.8.6' // If using Maven from Jenkins tools configuration
         // You might define paths to build tools, deployment targets, etc.
-        JAVA_HOME = tool 'JDK 11' // Assuming you have a JDK 11 configured in Jenkins Global Tool Configuration
+        JAVA_HOME = tool 'JDK' // Assuming you have a JDK 11 configured in Jenkins Global Tool Configuration
         // Define your build tool command here, e.g., 'mvn' for Maven or 'gradle' for Gradle
         BUILD_TOOL_CMD = 'mvn'
     }
