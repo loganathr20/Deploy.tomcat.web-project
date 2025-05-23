@@ -57,7 +57,7 @@ pipeline {
                     sh "${BUILD_TOOL_CMD} test"
                     echo 'Unit tests completed.'
                     // You might want to publish test results here, e.g.:
-                     junit '**/target/surefire-reports/*.xml'
+                     // junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -71,7 +71,7 @@ pipeline {
                     // This is a placeholder for your actual deployment logic.
                     // Examples:
                     // - Copy WAR/JAR to application server:
-                    //   sh 'scp target/your-app.war user@your-server:/path/to/webapps/'
+                       sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
                     //   sh 'docker build -t your-app .'
                     //   sh 'docker push your-registry/your-app'
