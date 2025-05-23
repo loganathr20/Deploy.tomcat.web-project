@@ -63,11 +63,19 @@ pipeline {
             }
         }
 
-      // Stage 4: Deployment
+// Stage 4: Deployment
         stage('Deployment') {
             steps {
                 script {
                     echo 'Starting deployment process...'
+                    // *** CUSTOMIZE THIS SECTION ***
+                    // This is a placeholder for your actual deployment logic.
+
+                    // Option 1: Using 'scp' directly (can be tricky with SSH setup)
+                    // Ensure SSH keys are properly set up on the Jenkins agent and target server.
+                    // The Jenkins agent needs to have 'ssh' and 'scp' commands available.
+                    // Consider using 'sshagent' block if you're using SSH credentials stored in Jenkins.
+                    // For example:
                     // *** CUSTOMIZE THIS SECTION ***  OPTION 1
                     // This is a placeholder for your actual deployment logic.
                     // Examples:
@@ -78,18 +86,48 @@ pipeline {
                     // sh 'cp target/dtw-1.0.0.war /opt/tomcat/webapps/'
                     // 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
 
-                    sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
+                    // sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
                     //   sh 'docker build -t your-app .'
                     //   sh 'docker push your-registry/your-app'
                     //   kubernetesDeploy() // If using Kubernetes plugin
                     // - Deploy using a specific tool (e.g., Ansible, Chef, Puppet)
                     //   sh 'ansible-playbook deploy.yml'
+                    
 
-             echo 'Application deployed. (Placeholder for actual deployment steps)'
+                    // Option 2: Recommended - Using 'publishOverSsh' (SSH Publisher Plugin)
+                    // This plugin simplifies file transfers and command execution over SSH.
+                    // Requires "Publish Over SSH" plugin installed and configured in Jenkins global settings.
+                    // You need to define SSH Servers under "Manage Jenkins" -> "Configure System" -> "Publish over SSH".
+                    // This example configures deployment to a Tomcat server's webapps directory.
+                    sshPublisher(publishers: [
+                        sshPublisherDesc(
+                            configName: 'LinuxMint-Thinkcentre', // IMPORTANT: Name configured in Jenkins global settings for your Tomcat server
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: 'target/*.war', // Assumes your Java project builds a .war file
+                                    remoteDirectory: '/opt/tomcat/webapps/', // Adjust to your Tomcat's webapps directory
+                                    removePrefix: 'target/', // Removes 'target/' from the path, so only 'your-app.war' is transferred
+                                    // Optional: If you want to delete the old WAR before transferring the new one
+                                    // cleanRemote: true // Use with caution, deletes everything in remoteDirectory
+                                )
+                            ],
+                        )
+                    ])
+
+                    // Option 3: Using 'ssh' step (SSH Pipeline Steps Plugin) for more direct command execution
+                    // This plugin allows you to execute shell commands on a remote server directly.
+                    // Requires "SSH Pipeline Steps" plugin installed.
+                    // You need to define a 'secretText' or 'usernamePassword' credential for SSH.
+                    // Example:
+                    // withCredentials([sshUserPrivateKey(credentialsId: 'your-ssh-credential-id', keyFileVariable: 'SSH_KEY')]) {
+                    //     sh "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no user@your-server 'sudo systemctl restart your-app-service'"
+                    // }
+
+                    echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
-            }    
-	}
+            }
+        }
 
    // Stage 5: Restart Servers
         stage('Restart Servers') {
