@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-        // Stage 4: Deployment
+      // Stage 4: Deployment
         stage('Deployment') {
             steps {
                 script {
@@ -101,13 +101,14 @@ pipeline {
                                      remoteDirectory: '/opt/tomcat/webapps/',
                                      removePrefix: 'target/'
                                  )
-                             ],
+                             ]
+ 		          ]
+                       }
                             echo 'Application deployed. (Placeholder for actual deployment steps)'
-                        }
-                   }
-        }    
+                    }
+           }    
 
-        // Stage 5: Restart Servers
+   // Stage 5: Restart Servers
         stage('Restart Servers') {
             steps {
                 script {
