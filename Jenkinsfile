@@ -72,9 +72,9 @@ pipeline {
                     // This is a placeholder for your actual deployment logic.
                     // Examples:
                     // - Copy WAR/JAR to application server:
-                    scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:~
-                    ssh lraja@LinuxMint-Thinkcentre
-                    sudo mv ~/dtw-1.0.0.war /opt/tomcat/webapps/
+                    sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:~'
+                    sh 'ssh lraja@LinuxMint-Thinkcentre'
+                    sh 'sudo mv ~/dtw-1.0.0.war /opt/tomcat/webapps/'
                     
                     // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
