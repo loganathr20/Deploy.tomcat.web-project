@@ -78,7 +78,7 @@ pipeline {
                     // sh 'cp target/dtw-1.0.0.war /opt/tomcat/webapps/'
                     // 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
 
-                    // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
+                    sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
                     // - Deploy to a container (e.g., Docker, Kubernetes):
                     //   sh 'docker build -t your-app .'
                     //   sh 'docker push your-registry/your-app'
@@ -104,11 +104,12 @@ pipeline {
                              ]
                          )
                        ]
-                         echo 'Application deployed. (Placeholder for actual deployment steps)'
+           
+                    echo 'Application deployed. (Placeholder for actual deployment steps)'
+                   
                     }
            }    
 	}
-
 
    // Stage 5: Restart Servers
         stage('Restart Servers') {
