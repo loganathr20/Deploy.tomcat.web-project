@@ -103,7 +103,7 @@ pipeline {
                    // /*
                      sshPublisher(publishers: [
                         sshPublisherDesc(
-                            configName: 'target', // IMPORTANT: Name configured in Jenkins global settings for your Tomcat server
+                            configName: 'tomcat', // IMPORTANT: Name configured in Jenkins global settings for your Tomcat server
                             transfers: [
                                 sshTransfer(
                                     sourceFiles: 'target/*.war', // Assumes your Java project builds a .war file
