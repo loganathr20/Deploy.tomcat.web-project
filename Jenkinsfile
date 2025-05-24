@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-// Stage 4: Deployment
+        // Stage 4: Deployment
         stage('Deployment') {
             steps {
                 script {
@@ -131,7 +131,7 @@ pipeline {
             }
         }
 
-   // Stage 5: Restart Servers
+        // Stage 5: Restart Servers
         stage('Restart Servers') {
             steps {
                 script {
