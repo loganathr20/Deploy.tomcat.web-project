@@ -87,9 +87,9 @@ pipeline {
                     // - credentialsId: The Jenkins Credentials ID for authenticating with Tomcat Manager.
                     // - war: The path to the WAR file to be deployed.
                     deploy adapters: [
-                        tomcat11(
-                            url: http://localhost:8080/,
-                            credentialsId: deployer/deployer
+                        tomcat9(
+                            url: http://localhost:8080/manager/text,
+                            credentialsId: TOMCAT_CREDENTIALS_ID
                         )
                     ],
                     contextPath: CONTEXT_PATH,
