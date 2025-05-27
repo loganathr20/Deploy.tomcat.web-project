@@ -65,9 +65,6 @@ pipeline {
 
         // Stage 4: Deployment
 
-        // *******************
-
-         // Stage 3: Deploy to Tomcat
         stage('Deploy to Tomcat') {
             steps {
                 echo 'Deploying WAR file to Tomcat...'
@@ -91,8 +88,8 @@ pipeline {
                     // - war: The path to the WAR file to be deployed.
                     deploy adapters: [
                         tomcat11(
-                            url: TOMCAT_URL,
-                            credentialsId: TOMCAT_CREDENTIALS_ID
+                            url: http://localhost:8080/,
+                            credentialsId: deployer
                         )
                     ],
                     contextPath: CONTEXT_PATH,
@@ -101,6 +98,7 @@ pipeline {
                 echo 'Deployment to Tomcat completed.'
             }
         }
+        
         // ****************
         
      /*   stage('Deployment') {
