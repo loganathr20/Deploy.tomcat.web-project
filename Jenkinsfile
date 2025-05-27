@@ -89,7 +89,7 @@ pipeline {
                     deploy adapters: [
                         tomcat11(
                             url: http://localhost:8080/,
-                            credentialsId: deployer
+                            credentialsId: deployer/deployer
                         )
                     ],
                     contextPath: CONTEXT_PATH,
