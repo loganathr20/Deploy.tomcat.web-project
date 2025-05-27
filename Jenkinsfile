@@ -58,7 +58,7 @@ pipeline {
                     sh "${BUILD_TOOL_CMD} test"
                     echo 'Unit tests completed.'
                     // You might want to publish test results here, e.g.:
-                     // junit '**/target/surefire-reports/*.xml'
+                      junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
