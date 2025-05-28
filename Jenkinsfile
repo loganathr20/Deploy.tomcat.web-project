@@ -58,14 +58,15 @@ pipeline {
                     sh "${BUILD_TOOL_CMD} test"
                     echo 'Unit tests completed.'
                     // You might want to publish test results here, e.g.:
-                      junit '**/target/surefire-reports/*.xml'
+                     // junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
 
         // Stage 4: Deployment
 
-        stage('Deploy to Tomcat') {
+        /* 
+            stage('Deploy to Tomcat') {
             steps {
                 echo 'Deploying WAR file to Tomcat...'
                 script {
@@ -74,7 +75,7 @@ pipeline {
                     // Adjust the pattern if your WAR file name is different (e.g., specific version).
                     def warFile = findFiles(glob: 'target/**/*.war')
 
-                    if (warFile.length == 0) {
+                /*    if (warFile.length == 0) {
                         error 'No WAR file found for deployment. Please check your build process.'
                     } else if (warFile.length > 1) {
                         echo "Warning: Multiple WAR files found. Deploying the first one: ${warFile[0].path}"
@@ -99,10 +100,11 @@ pipeline {
                 echo 'Deployment to Tomcat completed.'
             }
         }
-        
+        */
+
         // ****************
         
-     /*   stage('Deployment') {
+        stage('Deployment') {
             steps {
                 script {
                     echo 'Starting deployment process...'
