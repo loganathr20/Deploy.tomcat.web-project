@@ -130,7 +130,7 @@ pipeline {
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
-        }  */
+        }  
 
 
         // Stage 5: Restart Servers
