@@ -273,6 +273,12 @@ pipeline {
             // mail to: 'devs@example.com',
             //      subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
+            emailext(
+            from: 'jenkins@localhost',
+            to: 'loganathr20@gmail.com',
+            subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build succeeded! See details: ${env.BUILD_URL}"
+            )
         }
         // Runs only if the build failed
         failure {
@@ -280,6 +286,16 @@ pipeline {
             // mail to: 'devs@example.com',
             //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
+            emailext(
+            from: 'jenkins@localhost',
+            to: 'loganathr20@gmail.com',
+            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build failed! See details: ${env.BUILD_URL}",
+            attachLog: true,
+            compressLog: true
+            )
+
         }
     }
+
 }
