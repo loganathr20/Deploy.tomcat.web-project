@@ -230,16 +230,16 @@ pipeline {
                         Status     : ${status}
                         Build URL  : ${env.BUILD_URL}
                         """,
-                mimeType: 'text/plain',
-                attachLog: true,
-                compressLog: true
-            )
+                     mimeType: 'text/plain',
+                     attachLog: true,
+                     compressLog: true
+                )
         }
     }
-}
 
 
 
+/*
         stage('Email Notification2') {
             steps {
                 emailext(
@@ -259,14 +259,13 @@ pipeline {
 }
 
 
-
         }
     }
 }
 
+     }
+*/
 
-
-    }
 
     // Post-build actions that run after all stages have completed,
     // regardless of whether the build succeeded or failed.
