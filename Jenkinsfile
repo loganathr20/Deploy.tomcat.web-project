@@ -231,8 +231,8 @@ pipeline {
                         Build URL  : ${env.BUILD_URL}
                         """,
                      mimeType: 'text/plain',
-                     attachLog: true,
-                     compressLog: true
+                     // attachLog: true,
+                     // compressLog: true
                      )
                   }
                }
@@ -271,8 +271,8 @@ pipeline {
             to: 'loganathr20@gmail.com',
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build failed! See details: ${env.BUILD_URL}",
-            attachLog: true,
-            compressLog: true
+            // attachLog: true,
+            // compressLog: true
             )
 
         }
