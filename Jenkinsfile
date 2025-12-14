@@ -207,12 +207,8 @@ pipeline {
 //              def emailTo = readFile('Trigger_SITBuild.txt').trim()
 //                echo "Sending email to: ${emailTo}"
 
-                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt')
-                    .readLines()
-                    .find { it.trim().startsWith('Email=') }
-                    ?.split('=', 2)[1]
-                    ?.replaceAll('"', '')
-                    ?.trim()
+                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.trim()
+
 
                 if (!emailTo) {
                     error "Email not found in Trigger_SITBuild.txt"
