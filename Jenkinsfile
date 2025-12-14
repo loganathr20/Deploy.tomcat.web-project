@@ -207,7 +207,7 @@ pipeline {
 //              def emailTo = readFile('Trigger_SITBuild.txt').trim()
 //                echo "Sending email to: ${emailTo}"
 
-                def emailTo = readFile('Trigger_SITBuild.txt')
+                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt')
                     .readLines()
                     .find { it.trim().startsWith('Email=') }
                     ?.split('=', 2)[1]
