@@ -217,9 +217,11 @@ pipeline {
                     script {
                     // Default result if null
                     def status = currentBuild.currentResult ?: 'SUCCESS'
+                    def subjectStatus = currentBuild.currentResult
+                    def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
                     emailext(
-                       // from: 'loganathr20@gmail.com',
+                        from: 'loganathr20@gmail.com',
                         to: 'loganathr20@gmail.com',
                         subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         body: """\
@@ -231,8 +233,8 @@ pipeline {
                         Build URL  : ${env.BUILD_URL}
                         """,
                      mimeType: 'text/plain',
-                     // attachLog: true,
-                     // compressLog: true
+                        attachLog: true,
+                        compressLog: true
                      )
                   }
                }
@@ -254,7 +256,7 @@ pipeline {
             //      subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
             emailext(
-           // from: 'loganathr20@gmail.com',
+            from: 'loganathr20@gmail.com',
             to: 'loganathr20@gmail.com',
             subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build succeeded! See details: ${env.BUILD_URL}"
@@ -267,12 +269,12 @@ pipeline {
             //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
-           // from: 'loganathr20@gmail.com',
+            from: 'loganathr20@gmail.com',
             to: 'loganathr20@gmail.com',
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build failed! See details: ${env.BUILD_URL}",
-            // attachLog: true,
-            // compressLog: true
+            attachLog: true,
+            compressLog: true
             )
 
         }
