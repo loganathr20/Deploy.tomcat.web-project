@@ -211,7 +211,7 @@ pipeline {
                     compressLog: true
             )
 */
-
+            // Stage 8: Email Notification 
             stage('Email Notification') {
                 steps {
                     script {
@@ -221,7 +221,7 @@ pipeline {
                     emailext(
                         from: 'jenkins@localhost',
                         to: 'loganathr20@gmail.com',
-                        subject: "[${status}] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         body: """\
                         Jenkins Build Report
 
@@ -238,26 +238,6 @@ pipeline {
                }
             }
     }
-
-/*
-        stage('Email Notification2') {
-            steps {
-                emailext(
-                    from: 'jenkins@localhost',
-                    to: 'loganathr20@gmail.com',
-                    subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    
-                    body: """\
-                    Job Name   : ${env.JOB_NAME}
-                    Build No   : ${env.BUILD_NUMBER}
-                    Status     : ${currentBuild.currentResult}
-                    Build URL  : ${env.BUILD_URL}
-                    """,
-            mimeType: 'text/plain'
-            )
-        }
-*/
-
 
     // Post-build actions that run after all stages have completed,
     // regardless of whether the build succeeded or failed.
