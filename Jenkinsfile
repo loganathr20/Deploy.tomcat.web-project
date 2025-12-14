@@ -210,6 +210,27 @@ pipeline {
                     attachLog: true,
                     compressLog: true
             )
+
+stage('Email Notification2') {
+    steps {
+        emailext(
+            from: 'jenkins@localhost',
+            to: 'loganathr20@gmail.com',
+            subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: """\
+Job Name   : ${env.JOB_NAME}
+Build No   : ${env.BUILD_NUMBER}
+Status     : ${currentBuild.currentResult}
+Build URL  : ${env.BUILD_URL}
+""",
+            mimeType: 'text/plain'
+        )
+    }
+}
+
+
+
+
         }
     }
 }
