@@ -203,14 +203,26 @@ pipeline {
                 def subjectStatus = currentBuild.currentResult
                 def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
-                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
+//                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
 //              def emailTo = readFile('Trigger_SITBuild.txt').trim()
-                echo "Sending email to: ${emailTo}"
+//                echo "Sending email to: ${emailTo}"
 
+                def emailTo = readFile('Trigger_SITBuild.txt')
+                    .readLines()
+                    .find { it.trim().startsWith('Email=') }
+                    ?.split('=', 2)[1]
+                    ?.replaceAll('"', '')
+                    ?.trim()
+
+                if (!emailTo) {
+                    error "Email not found in Trigger_SITBuild.txt"
+                }
 
                 if (!emailTo) {
                       error "Email recipient list is empty. Check Trigger_SITBuild.txt"
                     }
+
+                echo "Sending email to: ${emailTo}"
 
                 emailext(
                     // from: 'loganathr20@gmail.com',
