@@ -184,6 +184,7 @@ pipeline {
                   }
         }
 
+        // Stage 8: Email Notification 
         stage('Email Notification') {
             steps {
                 script {
@@ -208,6 +209,7 @@ pipeline {
                      to: 'loganathr20@gmail.com',
                     attachLog: true,
                     compressLog: true
+                    emailext body: '', subject: '"[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"', to: 'loganathr20@gmail.com'
             )
         }
     }
