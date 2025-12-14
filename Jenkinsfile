@@ -220,9 +220,16 @@ pipeline {
                     def subjectStatus = currentBuild.currentResult
                     def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
+                    def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
+                    echo "Sending email to: ${emailTo}"
+
+                    if (!emailTo) {
+                        error "Email recipient list is empty. Check Trigger_SITBuild.txt"
+                        }
+
                     emailext(
-                        from: 'loganathr20@gmail.com',
-                        to: 'loganathr20@gmail.com',
+                        // from: 'loganathr20@gmail.com',
+                        to: emailTo,
                         subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         body: """\
                         Jenkins Build Report
