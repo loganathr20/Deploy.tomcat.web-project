@@ -223,7 +223,7 @@ pipeline {
             }
     }
 
-  /*
+
     // Post-build actions that run after all stages have completed,
     // regardless of whether the build succeeded or failed.
     post {
@@ -260,7 +260,6 @@ pipeline {
             compressLog: true
             )
         }
- */
 
     }
 
