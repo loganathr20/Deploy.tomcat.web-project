@@ -180,41 +180,9 @@ pipeline {
                     // You can archive build artifacts
                     // archiveArtifacts artifacts: 'target/*.jar, target/*.war', fingerprint: true
                     echo 'Post actions completed.'
-                      }
-                  }
+                }
+            }
         }
-
-        stage('Email Notification') {
-            steps {
-                script {
-
-                    def subjectStatus = currentBuild.currentResult
-                    def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-
-                    emailext(
-                        subject: subjectLine,
-                        body: """
-                            <h2>Jenkins Build Report</h2>
-
-                            <b>Job:</b> ${env.JOB_NAME}<br>
-                            <b>Build Number:</b> ${env.BUILD_NUMBER}<br>
-                            <b>Status:</b> ${subjectStatus}<br>
-                            <b>Triggered By:</b> ${env.BUILD_USER ?: 'SCM / Scheduler'}<br>
-                            <b>Build URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a><br>
-
-                            <hr>
-                            <p>Please find the attached console log for full details.</p>
-                            """,
-                     to: 'loganathr20@gmail.com',
-                    attachLog: true,
-                    compressLog: true
-            )
-        }
-    }
-}
-
-
-
     }
 
     // Post-build actions that run after all stages have completed,
