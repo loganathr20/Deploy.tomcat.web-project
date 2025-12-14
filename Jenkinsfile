@@ -183,6 +183,16 @@ pipeline {
                       }
                   }
         }
+/*
+        stage('Prepare Email File') {
+            steps {
+                sh '''
+                 sudo cp /home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt .
+                 sudo chown jenkins:jenkins Trigger_SITBuild.txt
+                '''
+            }
+        }
+ */
 
         // Stage 8: Email Notification 
         stage('Email Notification') {
@@ -193,8 +203,8 @@ pipeline {
                 def subjectStatus = currentBuild.currentResult
                 def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
-                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
-//              def emailTo = readFile('Trigger_SITBuild.txt').trim()
+//              def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
+                def emailTo = readFile('Trigger_SITBuild.txt').trim()
                 echo "Sending email to: ${emailTo}"
 
 
