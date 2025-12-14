@@ -185,7 +185,7 @@ pipeline {
         }
 
         // Stage 8: Email Notification 
-        stage('Email Notification') {
+/*         stage('Email Notification') {
             steps {
                 script {
 
@@ -210,6 +210,35 @@ pipeline {
                     attachLog: true,
                     compressLog: true
             )
+*/
+
+            stage('Email Notification') {
+                steps {
+                    script {
+                    // Default result if null
+                    def status = currentBuild.currentResult ?: 'SUCCESS'
+
+                    emailext(
+                        from: 'jenkins@localhost',
+                        to: 'loganathr20@gmail.com',
+                        subject: "[${status}] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """\
+                        Jenkins Build Report
+
+                        Job Name   : ${env.JOB_NAME}
+                        Build No   : ${env.BUILD_NUMBER}
+                        Status     : ${status}
+                        Build URL  : ${env.BUILD_URL}
+                        """,
+                mimeType: 'text/plain',
+                attachLog: true,
+                compressLog: true
+            )
+        }
+    }
+}
+
+
 
         stage('Email Notification2') {
             steps {
