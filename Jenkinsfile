@@ -185,73 +185,45 @@ pipeline {
         }
 
         // Stage 8: Email Notification 
-/*         stage('Email Notification') {
+        stage('Email Notification') {
             steps {
                 script {
+                // Default result if null
+                def status = currentBuild.currentResult ?: 'SUCCESS'
+                def subjectStatus = currentBuild.currentResult
+                def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
-                    def subjectStatus = currentBuild.currentResult
-                    def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
+//              def emailTo = readFile('Trigger_SITBuild.txt').trim()
+                echo "Sending email to: ${emailTo}"
 
-                    emailext(
-                        subject: subjectLine,
-                        body: """
-                            <h2>Jenkins Build Report</h2>
 
-                            <b>Job:</b> ${env.JOB_NAME}<br>
-                            <b>Build Number:</b> ${env.BUILD_NUMBER}<br>
-                            <b>Status:</b> ${subjectStatus}<br>
-                            <b>Triggered By:</b> ${env.BUILD_USER ?: 'SCM / Scheduler'}<br>
-                            <b>Build URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a><br>
+                if (!emailTo) {
+                      error "Email recipient list is empty. Check Trigger_SITBuild.txt"
+                    }
 
-                            <hr>
-                            <p>Please find the attached console log for full details.</p>
-                            """,
-                     to: 'loganathr20@gmail.com',
+                emailext(
+                    // from: 'loganathr20@gmail.com',
+                    to: emailTo,
+                    subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """\
+                    Jenkins Build Report
+
+                    Job Name   : ${env.JOB_NAME}
+                    Build No   : ${env.BUILD_NUMBER}
+                    Status     : ${status}
+                    Build URL  : ${env.BUILD_URL}
+                     """,
+                    mimeType: 'text/plain',
                     attachLog: true,
-                    compressLog: true
-            )
-*/
-
-
-            // Stage 8: Email Notification 
-            stage('Email Notification') {
-                steps {
-                    script {
-                    // Default result if null
-                    def status = currentBuild.currentResult ?: 'SUCCESS'
-                    def subjectStatus = currentBuild.currentResult
-                    def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-
-                    def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').trim()
-//                  def emailTo = readFile('Trigger_SITBuild.txt').trim()
-                    echo "Sending email to: ${emailTo}"
-
-
-                    if (!emailTo) {
-                        error "Email recipient list is empty. Check Trigger_SITBuild.txt"
-                        }
-
-                    emailext(
-                        // from: 'loganathr20@gmail.com',
-                        to: emailTo,
-                        subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        body: """\
-                        Jenkins Build Report
-
-                        Job Name   : ${env.JOB_NAME}
-                        Build No   : ${env.BUILD_NUMBER}
-                        Status     : ${status}
-                        Build URL  : ${env.BUILD_URL}
-                        """,
-                     mimeType: 'text/plain',
-                        attachLog: true,
-                        // compressLog: true
+                    // compressLog: true
                      )
                   }
                }
             }
     }
 
+  /*
     // Post-build actions that run after all stages have completed,
     // regardless of whether the build succeeded or failed.
     post {
@@ -287,8 +259,9 @@ pipeline {
             attachLog: true,
             compressLog: true
             )
-
         }
+ */
+
     }
 
 }
