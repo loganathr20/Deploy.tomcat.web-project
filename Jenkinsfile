@@ -237,7 +237,7 @@ pipeline {
                   }
                }
             }
-    
+    }
 
 /*
         stage('Email Notification2') {
@@ -254,16 +254,8 @@ pipeline {
                     Build URL  : ${env.BUILD_URL}
                     """,
             mimeType: 'text/plain'
-        )
-    }
-}
-
-
+            )
         }
-    }
-}
-
-     }
 */
 
 
