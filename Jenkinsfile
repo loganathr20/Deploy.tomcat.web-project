@@ -254,7 +254,7 @@ pipeline {
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
             emailext(
             from: 'loganathr20@gmail.com',
-            to: 'l_raja@hotmail.com',
+            to: 'loganathr20@gmail.com',
             subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
@@ -267,7 +267,7 @@ pipeline {
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
             from: 'loganathr20@gmail.com',
-            to: 'l_raja@hotmail.com',
+            to: 'loganathr20@gmail.com',
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
