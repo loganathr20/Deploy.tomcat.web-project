@@ -14,7 +14,8 @@ def buildSummaryHtml() {
     """
 }
 
-def defaultDL = 'l_raja@hotmail.com'
+def defaultDL = null
+// def defaultDL = 'l_raja@hotmail.com'
 def PostbuildDL = 'loganathr21@gmail.com'
 
 // These are populated later (agent/workspace required)
