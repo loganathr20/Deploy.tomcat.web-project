@@ -1,20 +1,6 @@
 // Jenkins Pipeline script for a Java project
 // This script defines a series of stages for building, testing, and deploying a Java application.
 
-/*
-def buildSummaryHtml() {
-    return """
-    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-        <tr><th align="left">Job Name</th><td>${env.JOB_NAME}</td></tr>
-        <tr><th align="left">Build Number</th><td>${env.BUILD_NUMBER}</td></tr>
-        <tr><th align="left">Status</th><td>${currentBuild.currentResult}</td></tr>
-        <tr><th align="left">Build URL</th>
-            <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
-        </tr>
-    </table>
-    """
-}
-*/
 
 def buildSummaryHtml() {
     return """
