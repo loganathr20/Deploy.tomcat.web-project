@@ -3,6 +3,11 @@
 // Jenkins Pipeline script for a Java project
 // This script defines a series of stages for building, testing, and deploying a Java application.
 
+def defaultDL = 'l_raja@hotmail.com'
+def PostbuildDL = 'loganathr21@gmail.com'
+def triggerEmail = null
+def finalEmailList = null
+
 pipeline {
     // Agent definition: 'any' means Jenkins will allocate an executor on any available agent.
     // You can specify a label here (e.g., agent { label 'my-java-agent' }) if you have specific agents.
@@ -204,8 +209,8 @@ pipeline {
                 def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
                 // def defaultDL = 'devops-dl@company.com'  // default distribution maillist for sending mail. not from trigger.
-                def defaultDL = 'l_raja@hotmail.com'
-                def PostbuildDL = 'loganathr21@gmail.com'
+               // def defaultDL = 'l_raja@hotmail.com'
+               // def PostbuildDL = 'loganathr21@gmail.com'
 
                 def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
