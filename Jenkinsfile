@@ -237,17 +237,18 @@ pipeline {
         unstable {
             echo 'Build unstable! Sending unstable notification...'
             retry(3) {
-            emailext(
-                    to: PostbuildDL,
-                    subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    mimeType: 'text/html',
-                    body: """
-                    <h2 style="color:orange;">Build Unstable ⚠️</h2>
-                    ${buildSummaryHtml()}
-                    """,
-                    attachLog: true,
-                    //compressLog: true
-            )
+                 emailext(
+                        to: PostbuildDL,
+                        subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        mimeType: 'text/html',
+                        body: """
+                        <h2 style="color:orange;">Build Unstable ⚠️</h2>
+                        ${buildSummaryHtml()}
+                        """,
+                        attachLog: true,
+                        //compressLog: true
+                )
+            }
         }
 
         // Cleans up Workspace.
