@@ -35,7 +35,6 @@ pipeline {
         BUILD_TOOL_CMD = 'mvn'
     }
 
-
     // Stages define the main steps of your pipeline.
     stages {
         stage('Prepare Email Distribution List') {
@@ -285,9 +284,8 @@ stage('Deployment') {
                     <h2 style="color:green;">Build Successful ✅</h2>
                     ${buildSummaryHtml()}
                     """
-                    attachLog: true,
+                    attachLog: true
                     // compressLog: true
-
                 )
             }
         }
@@ -305,7 +303,7 @@ stage('Deployment') {
                     <h2 style="color:red;">Build Failed ❌</h2>
                     ${buildSummaryHtml()}
                     """,
-                    attachLog: true,
+                    attachLog: true
                     // compressLog: true
                 )
             }
@@ -323,7 +321,7 @@ stage('Deployment') {
                         <h2 style="color:orange;">Build Unstable ⚠️</h2>
                         ${buildSummaryHtml()}
                         """,
-                        attachLog: true,
+                        attachLog: true
                         //compressLog: true
                 )
             }
