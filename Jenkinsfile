@@ -136,7 +136,7 @@ pipeline {
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
-        } */
+        } 
 
 // Stage 4: Deployment
 stage('Deployment') {
@@ -170,6 +170,40 @@ stage('Deployment') {
     }
 }
 
+*/
+
+        // Stage 4: Deployment
+        stage('Deployment') {
+                steps {
+                    script {
+                        try {
+                            sshPublisher(
+                                publishers: [
+                                    sshPublisherDesc(
+                                        configName: 'tomcat',
+                                        verbose: true,
+                                        transfers: [
+                                        sshTransfer(
+                                            sourceFiles: 'target/*.war',
+                                            removePrefix: 'target/',
+                                            remoteDirectory: '/opt/tomcat/webapps/',
+                                            execCommand: '''
+                                            echo "Restarting Tomcat service..."
+                                            systemctl restart tomcat || echo "Tomcat restart failed!"
+                                            ''',
+                                            execTimeout: 120000
+                                            )
+                                        ]
+                                    )   
+                                ]   
+                            )
+                            echo 'Application deployed successfully.'
+                        } catch (err) {
+                            error "Deployment failed: ${err}"
+                            }
+                    }
+                }
+        }
 
 
         // Stage 5: Restart Servers
