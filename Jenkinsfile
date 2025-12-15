@@ -110,68 +110,6 @@ pipeline {
         }
 
         // Stage 4: Deployment
-        
-        /*
-        stage('Deployment') {
-            steps {
-                script {
-                    echo 'Starting deployment process...'
-                    // *** CUSTOMIZE THIS SECTION ***
-                    // This is a placeholder for your actual deployment logic.
-
-                    sshPublisher(publishers: [
-                        sshPublisherDesc(
-                            configName: 'tomcat', // IMPORTANT: Name configured in Jenkins global settings
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: 'target/*.war',
-                                    remoteDirectory: '/opt/tomcat/webapps/',
-                                    removePrefix: 'target/'
-                                )
-                            ]
-                        )
-                    ])
-
-                    echo 'Application deployed. (Placeholder for actual deployment steps)'
-                }
-            }
-        } 
-
-// Stage 4: Deployment
-stage('Deployment') {
-    steps {
-        script {
-            echo 'Starting deployment process...'
-
-            // Ensure SSH key credentials are used properly
-            // The 'configName' should match the Jenkins SSH credentials configuration
-            sshPublisher(publishers: [
-                sshPublisherDesc(
-                    configName: 'tomcat', // Name configured in Jenkins global settings
-                    verbose: true,        // Enables detailed logging
-                    transfers: [
-                        sshTransfer(
-                            sourceFiles: 'target/*.war',     // Files to copy
-                            removePrefix: 'target/',        // Strip 'target/' from path
-                            remoteDirectory: '/opt/tomcat/webapps/', // Remote deployment dir
-                            execCommand: '''                 // Optional: commands to run after copy
-                                echo "Restarting Tomcat service..."
-                                systemctl restart tomcat || echo "Tomcat restart failed!"
-                            ''',
-                            execTimeout: 120000              // 2 min timeout for commands
-                        )
-                    ]
-                )
-            ])
-
-            echo 'Application deployed successfully.'
-        }
-    }
-}
-
-*/
-
-        // Stage 4: Deployment
         stage('Deployment') {
                 steps {
                     script {
