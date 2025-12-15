@@ -255,7 +255,7 @@ pipeline {
             emailext(
             from: 'loganathr20@gmail.com',
             to: 'loganathr21@gmail.com',
-            subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action ",
+            subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Success",
             body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
         }
@@ -268,7 +268,7 @@ pipeline {
             emailext(
             from: 'loganathr20@gmail.com',
             to: 'loganathr21@gmail.com',
-            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action ",
+            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Failure",
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
             compressLog: true
