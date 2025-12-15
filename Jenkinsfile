@@ -7,7 +7,8 @@ def defaultDL = 'l_raja@hotmail.com'
 def PostbuildDL = 'loganathr21@gmail.com'
 // def triggerEmail = null
 def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
-def finalEmailList = null
+// def finalEmailList = null
+def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
 
 pipeline {
     // Agent definition: 'any' means Jenkins will allocate an executor on any available agent.
@@ -215,7 +216,7 @@ pipeline {
 
                // def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
-                def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
+              // def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
 
                 if (!triggerEmail) {
                       error "Email recipient list is empty. Check Trigger_SITBuild.txt. Sending mail to default distribution list email only "
