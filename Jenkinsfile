@@ -5,7 +5,8 @@
 
 def defaultDL = 'l_raja@hotmail.com'
 def PostbuildDL = 'loganathr21@gmail.com'
-def triggerEmail = null
+// def triggerEmail = null
+def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 def finalEmailList = null
 
 pipeline {
@@ -212,7 +213,7 @@ pipeline {
                // def defaultDL = 'l_raja@hotmail.com'
                // def PostbuildDL = 'loganathr21@gmail.com'
 
-                def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
+               // def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
                 def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
 
