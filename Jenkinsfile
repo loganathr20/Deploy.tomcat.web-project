@@ -285,6 +285,9 @@ stage('Deployment') {
                     <h2 style="color:green;">Build Successful ✅</h2>
                     ${buildSummaryHtml()}
                     """
+                    attachLog: true,
+                    // compressLog: true
+
                 )
             }
         }
