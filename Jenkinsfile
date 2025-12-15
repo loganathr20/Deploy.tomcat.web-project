@@ -205,6 +205,7 @@ pipeline {
 
                 // def defaultDL = 'devops-dl@company.com'  // default distribution maillist for sending mail. not from trigger.
                 def defaultDL = 'l_raja@hotmail.com'
+                def PostbuildDL = 'loganathr21@gmail.com'
 
                 def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
@@ -254,8 +255,9 @@ pipeline {
             //      subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
             emailext(
-            from: 'loganathr20@gmail.com',
-            to: 'loganathr21@gmail.com',
+//          from: 'loganathr20@gmail.com',
+//          to: 'loganathr21@gmail.com',
+            to: PostbuildDL,
             subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Success",
             body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
@@ -268,8 +270,9 @@ pipeline {
             //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
-            from: 'loganathr20@gmail.com',
-            to: 'loganathr21@gmail.com',
+//          from: 'loganathr20@gmail.com',
+//          to: 'loganathr21@gmail.com',
+            to: PostbuildDL,
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Failure",
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
@@ -284,8 +287,9 @@ pipeline {
             //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
-            from: 'loganathr20@gmail.com',
-            to: 'loganathr21@gmail.com',
+//          from: 'loganathr20@gmail.com',
+//          to: 'loganathr21@gmail.com',
+            to: PostbuildDL,
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Unstable",
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
