@@ -215,7 +215,7 @@ pipeline {
             echo 'Build and deployment succeeded! Sending success notification...'
             retry(3) {
                 emailext(
-                    to: PostbuildDL,finalEmailList
+                    to: "${PostbuildDL},${finalEmailList}",
                     subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     mimeType: 'text/html',
                     body: """
@@ -242,7 +242,8 @@ pipeline {
             echo 'Build or deployment failed! Sending failure notification...'
             retry(3) {
                 emailext(
-                    to: PostbuildDL,finalEmailList
+//                    to: PostbuildDL,finalEmailList
+                    to: "${PostbuildDL},${finalEmailList}",
                     subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     mimeType: 'text/html',
                     body: """
@@ -271,7 +272,7 @@ pipeline {
             echo 'Build unstable! Sending unstable notification...'
             retry(3) {
                  emailext(
-                        to: PostbuildDL,finalEmailList
+                        to: "${PostbuildDL},${finalEmailList}",
                         subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         mimeType: 'text/html',
                         body: """
