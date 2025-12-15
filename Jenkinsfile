@@ -52,11 +52,11 @@ def buildSummaryHtml() {
 }
 
 // email list for default Distribution list. This will send mail additional mail excluding Email configured in Trigger file.
-def defaultDL = null
+def defaultDL = ''
 // def defaultDL = 'l_raja@hotmail.com'
 
 // email list for post build action.
-def PostbuildDL = null
+def PostbuildDL = ''
 // def PostbuildDL = 'loganathr21@gmail.com'
 
 // These are populated later (agent/workspace required)
