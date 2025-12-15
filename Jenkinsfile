@@ -1,14 +1,12 @@
-
-
 // Jenkins Pipeline script for a Java project
 // This script defines a series of stages for building, testing, and deploying a Java application.
 
 def defaultDL = 'l_raja@hotmail.com'
 def PostbuildDL = 'loganathr21@gmail.com'
-// def triggerEmail = null
-def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
-// def finalEmailList = null
-def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
+
+// These are populated later (agent/workspace required)
+def triggerEmail = null
+def finalEmailList = null
 
 pipeline {
     // Agent definition: 'any' means Jenkins will allocate an executor on any available agent.
@@ -26,6 +24,38 @@ pipeline {
 
     // Stages define the main steps of your pipeline.
     stages {
+
+        // ================================
+        // REQUIRED FIX STAGE (ADDED)
+        // ================================
+        stage('Prepare Email Distribution List') {
+            steps {
+                script {
+                    echo 'Preparing email distribution list from trigger repository...'
+
+                    triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt')
+                        .readLines()
+                        .find { it.trim().startsWith('Email=') }
+                        ?.split('=',2)[1]
+                        ?.replaceAll('"','')
+                        ?.split(',')
+                        ?.collect { it.trim() }
+                        ?.join(',')
+
+                    // Combine default DL + trigger DL
+                    finalEmailList = [defaultDL, triggerEmail]
+                        .findAll { it }
+                        .join(',')
+
+                    if (!triggerEmail) {
+                        echo "Trigger email not found. Using default DL only."
+                    }
+
+                    echo "Final email list resolved as: ${finalEmailList}"
+                }
+            }
+        }
+
         // Stage 1: Checkout SCM (Source Code Management)
         stage('Checkout SCM') {
             steps {
@@ -65,13 +95,12 @@ pipeline {
                     sh "${BUILD_TOOL_CMD} test"
                     echo 'Unit tests completed.'
                     // You might want to publish test results here, e.g.:
-                     // junit '**/target/surefire-reports/*.xml'
+                    // junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
 
         // Stage 4: Deployment
-
         stage('Deployment') {
             steps {
                 script {
@@ -79,84 +108,32 @@ pipeline {
                     // *** CUSTOMIZE THIS SECTION ***
                     // This is a placeholder for your actual deployment logic.
 
-                    // Option 1: Using 'scp' directly (can be tricky with SSH setup)
-                    // Ensure SSH keys are properly set up on the Jenkins agent and target server.
-                    // The Jenkins agent needs to have 'ssh' and 'scp' commands available.
-                    // Consider using 'sshagent' block if you're using SSH credentials stored in Jenkins.
-                    // For example:
-                    // *** CUSTOMIZE THIS SECTION ***  OPTION 1
-                    // This is a placeholder for your actual deployment logic.
-                    // Examples:
-                    // - Copy WAR/JAR to application server:
-                    // sh 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:~'
-                    // sh 'ssh lraja@LinuxMint-Thinkcentre'
-                    // 'sudo mv ~/dtw-1.0.0.war /opt/tomcat/webapps/'
-                    // sh 'cp target/dtw-1.0.0.war /opt/tomcat/webapps/'
-                    // 'scp target/dtw-1.0.0.war lraja@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
-
-                    // sh 'scp target/dtw-1.0.0.war deployer@LinuxMint-Thinkcentre:/opt/tomcat/webapps/'
-                    // - Deploy to a container (e.g., Docker, Kubernetes):
-                    //   sh 'docker build -t your-app .'
-                    //   sh 'docker push your-registry/your-app'
-                    //   kubernetesDeploy() // If using Kubernetes plugin
-                    // - Deploy using a specific tool (e.g., Ansible, Chef, Puppet)
-                    //   sh 'ansible-playbook deploy.yml'
-                    
-
-                    // Option 2: Recommended - Using 'publishOverSsh' (SSH Publisher Plugin)
-                    // This plugin simplifies file transfers and command execution over SSH.
-                    // Requires "Publish Over SSH" plugin installed and configured in Jenkins global settings.
-                    // You need to define SSH Servers under "Manage Jenkins" -> "Configure System" -> "Publish over SSH".
-                    // This example configures deployment to a Tomcat server's webapps directory.
-                   // /*
-                     sshPublisher(publishers: [
+                    sshPublisher(publishers: [
                         sshPublisherDesc(
-                            configName: 'tomcat', // IMPORTANT: Name configured in Jenkins global settings for your Tomcat server
+                            configName: 'tomcat', // IMPORTANT: Name configured in Jenkins global settings
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: 'target/*.war', // Assumes your Java project builds a .war file
-                                    remoteDirectory: '/opt/tomcat/webapps/', // Adjust to your Tomcat's webapps directory
-                                    removePrefix: 'target/', // Removes 'target/' from the path, so only 'your-app.war' is transferred
-                                    // Optional: If you want to delete the old WAR before transferring the new one
-                                    // cleanRemote: true // Use with caution, deletes everything in remoteDirectory
+                                    sourceFiles: 'target/*.war',
+                                    remoteDirectory: '/opt/tomcat/webapps/',
+                                    removePrefix: 'target/'
                                 )
-                            ],
+                            ]
                         )
                     ])
-
-                    // Option 3: Using 'ssh' step (SSH Pipeline Steps Plugin) for more direct command execution
-                    // This plugin allows you to execute shell commands on a remote server directly.
-                    // Requires "SSH Pipeline Steps" plugin installed.
-                    // You need to define a 'secretText' or 'usernamePassword' credential for SSH.
-                    // Example:
-                    // withCredentials([sshUserPrivateKey(credentialsId: 'your-ssh-credential-id', keyFileVariable: 'SSH_KEY')]) {
-                    //     sh "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no user@your-server 'sudo systemctl restart your-app-service'"
-                    // }
-                   // 
 
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
-        }  
-
+        }
 
         // Stage 5: Restart Servers
-        
         stage('Restart Servers') {
             steps {
                 script {
                     echo 'Restarting application servers...'
-                    // *** CUSTOMIZE THIS SECTION ***
-                    // This is a placeholder for server restart logic.
-                    // Examples:
-                    // - SSH command to restart a service:
-                    //   sh 'ssh user@your-server "sudo systemctl restart your-app-service"'
-                    // - Calling a management API or script.
-                    // 'ssh lraja@LinuxMint-Thinkcentre "sudo systemctl restart tomcat"'
                     sh 'sudo systemctl status tomcat'
                     sh 'sudo systemctl restart tomcat'
                     sh 'sudo systemctl status tomcat'
-                    
                     echo 'Servers restarted. (Placeholder for actual restart steps)'
                 }
             }
@@ -167,13 +144,6 @@ pipeline {
             steps {
                 script {
                     echo 'Performing sanity checks on the deployed application...'
-                    // *** CUSTOMIZE THIS SECTION ***
-                    // This is a placeholder for post-deployment sanity checks.
-                    // Examples:
-                    // - Hit a health check endpoint:
-                    //   sh 'curl -f http://your-app-url/health || exit 1'
-                    // - Check logs for specific messages:
-                    //   sh 'ssh user@your-server "grep -q \'Application started\' /var/log/your-app.log"'
                     echo 'Sanity checks completed. Application is up and running. (Placeholder)'
                 }
             }
@@ -184,135 +154,84 @@ pipeline {
             steps {
                 script {
                     echo 'Executing post-build actions...'
-                    // You can archive build artifacts
-                    // archiveArtifacts artifacts: 'target/*.jar, target/*.war', fingerprint: true
                     echo 'Post actions completed.'
-                      }
-                  }
-        }
-/*
-        stage('Prepare Email File') {
-            steps {
-                sh '''
-                 sudo cp /home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt .
-                 sudo chown jenkins:jenkins Trigger_SITBuild.txt
-                '''
+                }
             }
         }
- */
 
-        // Stage 8: Email Notification 
+        // Stage 8: Email Notification
         stage('Email Notification') {
             steps {
                 script {
-                // Default result if null
-                def status = currentBuild.currentResult ?: 'SUCCESS'
-                def subjectStatus = currentBuild.currentResult
-                def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                    def status = currentBuild.currentResult ?: 'SUCCESS'
 
-                // def defaultDL = 'devops-dl@company.com'  // default distribution maillist for sending mail. not from trigger.
-               // def defaultDL = 'l_raja@hotmail.com'
-               // def PostbuildDL = 'loganathr21@gmail.com'
+                    echo "Sending email to: ${finalEmailList}"
 
-               // def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
+                    emailext(
+                        to: finalEmailList,
+                        subject: "Jenkins Build ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """\
+Jenkins Build Report
 
-              // def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
-
-                if (!triggerEmail) {
-                      error "Email recipient list is empty. Check Trigger_SITBuild.txt. Sending mail to default distribution list email only "
-                    }
-
-                echo "Sending email to: ${finalEmailList}"
-
-                emailext(
-                    // from: 'loganathr20@gmail.com',
-                    to: finalEmailList,
-                    subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: """\
-                    Jenkins Build Report
-
-                    Job Name   : ${env.JOB_NAME}
-                    Build No   : ${env.BUILD_NUMBER}
-                    Status     : ${status}
-                    Build URL  : ${env.BUILD_URL}
-                     """,
-                    mimeType: 'text/plain',
-                    attachLog: true,
-                    // compressLog: true
-                     )
-                  }
-               }
+Job Name   : ${env.JOB_NAME}
+Build No   : ${env.BUILD_NUMBER}
+Status     : ${status}
+Build URL  : ${env.BUILD_URL}
+""",
+                        mimeType: 'text/plain',
+                        attachLog: true
+                    )
+                }
             }
+        }
     }
 
-
-    // Post-build actions that run after all stages have completed,
-    // regardless of whether the build succeeded or failed.
+    // Post-build actions that run after all stages have completed
     post {
-        // Always runs
         always {
             echo 'Pipeline finished. Cleaning up workspace...'
-            // cleanWs() // Cleans up the workspace on the agent
         }
 
-        // Runs only if the build succeeded
         success {
             echo 'Build and deployment succeeded! Sending success notification...'
-            // mail to: 'devs@example.com',
-            //      subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
             emailext(
-//          from: 'loganathr20@gmail.com',
-//          to: 'loganathr21@gmail.com',
-            to: PostbuildDL,
-            subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Success",
-            body: "Build succeeded! See details: ${env.BUILD_URL}"
+                to: PostbuildDL,
+                subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Success",
+                body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
         }
 
-        // Runs only if the build failed
         failure {
             echo 'Build or deployment failed! Sending failure notification...'
-            // mail to: 'devs@example.com',
-            //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
-//          from: 'loganathr20@gmail.com',
-//          to: 'loganathr21@gmail.com',
-            to: PostbuildDL,
-            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Failure",
-            body: "Build failed! See details: ${env.BUILD_URL}",
-            attachLog: true,
-            compressLog: true
+                to: PostbuildDL,
+                subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Failure",
+                body: "Build failed! See details: ${env.BUILD_URL}",
+                attachLog: true,
+                compressLog: true
             )
         }
 
-        // Runs only if the build is unstable
         unstable {
-            echo 'Build or deployment failed! Sending failure notification...'
-            // mail to: 'devs@example.com',
-            //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
+            echo 'Build unstable! Sending unstable notification...'
             emailext(
-//          from: 'loganathr20@gmail.com',
-//          to: 'loganathr21@gmail.com',
-            to: PostbuildDL,
-            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Unstable",
-            body: "Build failed! See details: ${env.BUILD_URL}",
-            attachLog: true,
-            compressLog: true
+                to: PostbuildDL,
+                subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Unstable",
+                body: "Build unstable! See details: ${env.BUILD_URL}",
+                attachLog: true,
+                compressLog: true
             )
         }
 
-        // Cleans up Workspace. 
+        // Cleans up Workspace.
         cleanup {
-           echo "Cleaning up workspace..."
+            echo "Cleaning up workspace..."
             cleanWs(
                 deleteDirs: true,
                 disableDeferredWipeout: true
             )
         }
-
     }
-
 }
+
+
