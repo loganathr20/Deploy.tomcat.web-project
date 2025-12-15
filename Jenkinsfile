@@ -171,7 +171,7 @@ pipeline {
         }
 
         // Stage 8: Email Notification
-         stage('Email Notification') {
+        /* stage('Email Notification') {
             steps {
                 script {
                     def status = currentBuild.currentResult ?: 'SUCCESS'
@@ -194,8 +194,8 @@ pipeline {
                     )
                 }
             }
-        } 
-    }
+        } */
+    } 
 
     // Post-build actions that run after all stages have completed
     post {
@@ -211,6 +211,22 @@ pipeline {
                 body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
         } */
+
+        success {
+            echo 'Build and deployment succeeded! Sending success notification...'
+            retry(3) {
+                emailext(
+                    to: PostbuildDL,
+                    subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    mimeType: 'text/html',
+                    body: """
+                    <h2 style="color:green;">Build Successful ✅</h2>
+                    ${buildSummaryHtml()}
+                    """
+                )
+            }
+        }
+
 
         /* failure {
             echo 'Build or deployment failed! Sending failure notification...'
