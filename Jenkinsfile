@@ -111,6 +111,8 @@ pipeline {
         }
 
         // Stage 4: Deployment
+        
+        /*
         stage('Deployment') {
             steps {
                 script {
@@ -134,7 +136,41 @@ pipeline {
                     echo 'Application deployed. (Placeholder for actual deployment steps)'
                 }
             }
+        } */
+
+// Stage 4: Deployment
+stage('Deployment') {
+    steps {
+        script {
+            echo 'Starting deployment process...'
+
+            // Ensure SSH key credentials are used properly
+            // The 'configName' should match the Jenkins SSH credentials configuration
+            sshPublisher(publishers: [
+                sshPublisherDesc(
+                    configName: 'tomcat', // Name configured in Jenkins global settings
+                    verbose: true,        // Enables detailed logging
+                    transfers: [
+                        sshTransfer(
+                            sourceFiles: 'target/*.war',     // Files to copy
+                            removePrefix: 'target/',        // Strip 'target/' from path
+                            remoteDirectory: '/opt/tomcat/webapps/', // Remote deployment dir
+                            execCommand: '''                 // Optional: commands to run after copy
+                                echo "Restarting Tomcat service..."
+                                systemctl restart tomcat || echo "Tomcat restart failed!"
+                            ''',
+                            execTimeout: 120000              // 2 min timeout for commands
+                        )
+                    ]
+                )
+            ])
+
+            echo 'Application deployed successfully.'
         }
+    }
+}
+
+
 
         // Stage 5: Restart Servers
         stage('Restart Servers') {
@@ -194,6 +230,7 @@ pipeline {
                 }
             }
         } */
+
     } 
 
     // Post-build actions that run after all stages have completed
@@ -202,14 +239,6 @@ pipeline {
             echo 'Pipeline finished. Cleaning up workspace...'
         }
 
-        /* success {
-            echo 'Build and deployment succeeded! Sending success notification...'
-            emailext(
-                to: PostbuildDL,
-                subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Success",
-                body: "Build succeeded! See details: ${env.BUILD_URL}"
-            )
-        } */
 
         success {
             echo 'Build and deployment succeeded! Sending success notification...'
@@ -226,17 +255,6 @@ pipeline {
             }
         }
 
-
-        /* failure {
-            echo 'Build or deployment failed! Sending failure notification...'
-            emailext(
-                to: PostbuildDL,
-                subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Failure",
-                body: "Build failed! See details: ${env.BUILD_URL}",
-                attachLog: true,
-                compressLog: true
-            )
-        } */
 
         failure {
             echo 'Build or deployment failed! Sending failure notification...'
@@ -256,17 +274,6 @@ pipeline {
             }
         }
 
-
-        /* unstable {
-            echo 'Build unstable! Sending unstable notification...'
-            emailext(
-                to: PostbuildDL,
-                subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Unstable",
-                body: "Build unstable! See details: ${env.BUILD_URL}",
-                attachLog: true,
-                compressLog: true
-            )
-        } */
 
         unstable {
             echo 'Build unstable! Sending unstable notification...'
