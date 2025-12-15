@@ -206,11 +206,11 @@ pipeline {
                 // def defaultDL = 'devops-dl@company.com'  // default distribution maillist for sending mail. not from trigger.
                 def defaultDL = 'l_raja@hotmail.com'
 
-                def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
+                def triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
                 def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
 
-                if (!emailTo) {
+                if (!triggerEmail) {
                       error "Email recipient list is empty. Check Trigger_SITBuild.txt. Sending mail to default distribution list email only "
                     }
 
