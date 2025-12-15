@@ -266,12 +266,12 @@ stage('Deployment') {
 
     } 
 
+
     // Post-build actions that run after all stages have completed
     post {
         always {
             echo 'Pipeline finished. Cleaning up workspace...'
         }
-
 
         success {
             echo 'Build and deployment succeeded! Sending success notification...'
@@ -283,19 +283,17 @@ stage('Deployment') {
                     body: """
                     <h2 style="color:green;">Build Successful ✅</h2>
                     ${buildSummaryHtml()}
-                    """
+                    """,
                     attachLog: true
-                    // compressLog: true
+                //  compressLog: true
                 )
             }
         }
-
 
         failure {
             echo 'Build or deployment failed! Sending failure notification...'
             retry(3) {
                 emailext(
-//                    to: PostbuildDL,finalEmailList
                     to: "${PostbuildDL},${finalEmailList}",
                     subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     mimeType: 'text/html',
@@ -304,30 +302,29 @@ stage('Deployment') {
                     ${buildSummaryHtml()}
                     """,
                     attachLog: true
-                    // compressLog: true
+                //  compressLog: true
                 )
             }
         }
-
 
         unstable {
             echo 'Build unstable! Sending unstable notification...'
             retry(3) {
-                 emailext(
-                        to: "${PostbuildDL},${finalEmailList}",
-                        subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        mimeType: 'text/html',
-                        body: """
-                        <h2 style="color:orange;">Build Unstable ⚠️</h2>
-                        ${buildSummaryHtml()}
-                        """,
-                        attachLog: true
-                        //compressLog: true
+                emailext(
+                    to: "${PostbuildDL},${finalEmailList}",
+                    subject: "[UNSTABLE] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    mimeType: 'text/html',
+                    body: """
+                    <h2 style="color:orange;">Build Unstable ⚠️</h2>
+                    ${buildSummaryHtml()}
+                    """,
+                    attachLog: true
+                //  compressLog: true
                 )
             }
         }
 
-        // Cleans up Workspace.
+    // Cleans up Workspace.
         cleanup {
             echo "Cleaning up workspace..."
             cleanWs(
@@ -336,6 +333,7 @@ stage('Deployment') {
             )
         }
     }
+
 }
 
 
