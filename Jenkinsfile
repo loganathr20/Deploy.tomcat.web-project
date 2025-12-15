@@ -1,6 +1,7 @@
 // Jenkins Pipeline script for a Java project
 // This script defines a series of stages for building, testing, and deploying a Java application.
 
+/*
 def buildSummaryHtml() {
     return """
     <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
@@ -13,6 +14,43 @@ def buildSummaryHtml() {
     </table>
     """
 }
+*/
+
+def buildSummaryHtml() {
+    return """
+    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">
+        <tr style="background:#f2f2f2;">
+            <th align="left">Item</th>
+            <th align="left">Value</th>
+        </tr>
+        <tr>
+            <td><b>Job Name</b></td>
+            <td>${env.JOB_NAME}</td>
+        </tr>
+        <tr>
+            <td><b>Build #</b></td>
+            <td>${env.BUILD_NUMBER}</td>
+        </tr>
+        <tr>
+            <td><b>Status</b></td>
+            <td>${currentBuild.currentResult}</td>
+        </tr>
+        <tr>
+            <td><b>Branch</b></td>
+            <td>${env.GIT_BRANCH ?: 'N/A'}</td>
+        </tr>
+        <tr>
+            <td><b>Triggered By</b></td>
+            <td>${currentBuild.getBuildCauses()[0].shortDescription}</td>
+        </tr>
+        <tr>
+            <td><b>Build URL</b></td>
+            <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
+        </tr>
+    </table>
+    """
+}
+
 
 def defaultDL = null
 // def defaultDL = 'l_raja@hotmail.com'
