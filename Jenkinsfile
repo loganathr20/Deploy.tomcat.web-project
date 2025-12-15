@@ -203,21 +203,22 @@ pipeline {
                 def subjectStatus = currentBuild.currentResult
                 def subjectLine = "[${subjectStatus}] ${env.JOB_NAME} #${env.BUILD_NUMBER}"
 
+                // def defaultDL = 'devops-dl@company.com'  // default distribution maillist for sending mail. not from trigger.
+                def defaultDL = 'l_raja@hotmail.com'
+
                 def emailTo = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt').readLines().find { it.trim().startsWith('Email=') }?.split('=',2)[1]?.replaceAll('"','')?.split(',')?.collect { it.trim() }?.join(',')
 
-                if (!emailTo) {
-                    error "Email not found in Trigger_SITBuild.txt"
-                }
+                def finalEmailList = [defaultDL, triggerEmail].findAll { it }?.join(',')
 
                 if (!emailTo) {
-                      error "Email recipient list is empty. Check Trigger_SITBuild.txt"
+                      error "Email recipient list is empty. Check Trigger_SITBuild.txt. Sending mail to default distribution list email only "
                     }
 
-                echo "Sending email to: ${emailTo}"
+                echo "Sending email to: ${finalEmailList}"
 
                 emailext(
                     // from: 'loganathr20@gmail.com',
-                    to: emailTo,
+                    to: finalEmailList,
                     subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: """\
                     Jenkins Build Report
@@ -253,7 +254,7 @@ pipeline {
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded. Check ${env.BUILD_URL}"
             emailext(
             from: 'loganathr20@gmail.com',
-            to: 'loganathr20@gmail.com',
+            to: 'l_raja@hotmail.com',
             subject: "[SUCCESS] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
@@ -266,7 +267,7 @@ pipeline {
             //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
             emailext(
             from: 'loganathr20@gmail.com',
-            to: 'loganathr20@gmail.com',
+            to: 'l_raja@hotmail.com',
             subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
