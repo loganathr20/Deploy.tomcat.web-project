@@ -251,7 +251,7 @@ pipeline {
                     ${buildSummaryHtml()}
                     """,
                     attachLog: true
-                //  compressLog: true
+                    compressLog: true
                 )
             }
         }
