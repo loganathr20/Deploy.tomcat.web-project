@@ -250,8 +250,8 @@ pipeline {
                     <h2 style="color:green;">Build Successful ✅</h2>
                     ${buildSummaryHtml()}
                     """,
-                    attachLog: true,
-                    compressLog: true
+                    attachLog: true
+                    // compressLog: true
                 )
             }
         }
