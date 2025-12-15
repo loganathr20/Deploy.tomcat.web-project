@@ -212,7 +212,7 @@ pipeline {
             )
         }
 
-        failure {
+        /* failure {
             echo 'Build or deployment failed! Sending failure notification...'
             emailext(
                 to: PostbuildDL,
@@ -221,7 +221,25 @@ pipeline {
                 attachLog: true,
                 compressLog: true
             )
+        } */
+
+        failure {
+            echo 'Build or deployment failed! Sending failure notification...'
+            retry(3) {
+                emailext(
+                    to: PostbuildDL,
+                    subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    mimeType: 'text/html',
+                    body: """
+                    <h2 style="color:red;">Build Failed ❌</h2>
+                    ${buildSummaryHtml()}
+                    """,
+                    attachLog: true,
+                    // compressLog: true
+                )
+            }
         }
+
 
         /* unstable {
             echo 'Build unstable! Sending unstable notification...'
