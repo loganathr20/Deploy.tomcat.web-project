@@ -22,12 +22,9 @@ pipeline {
         BUILD_TOOL_CMD = 'mvn'
     }
 
+
     // Stages define the main steps of your pipeline.
     stages {
-
-        // ================================
-        // REQUIRED FIX STAGE (ADDED)
-        // ================================
         stage('Prepare Email Distribution List') {
             steps {
                 script {
@@ -171,13 +168,13 @@ pipeline {
                         to: finalEmailList,
                         subject: "Jenkins Build ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         body: """\
-Jenkins Build Report
+                            Jenkins Build Report
 
-Job Name   : ${env.JOB_NAME}
-Build No   : ${env.BUILD_NUMBER}
-Status     : ${status}
-Build URL  : ${env.BUILD_URL}
-""",
+                            Job Name   : ${env.JOB_NAME}
+                            Build No   : ${env.BUILD_NUMBER}
+                            Status     : ${status}
+                            Build URL  : ${env.BUILD_URL}
+                        """,
                         mimeType: 'text/plain',
                         attachLog: true
                     )
