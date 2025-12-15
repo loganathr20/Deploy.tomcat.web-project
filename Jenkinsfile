@@ -246,6 +246,7 @@ pipeline {
             echo 'Pipeline finished. Cleaning up workspace...'
             // cleanWs() // Cleans up the workspace on the agent
         }
+
         // Runs only if the build succeeded
         success {
             echo 'Build and deployment succeeded! Sending success notification...'
@@ -259,6 +260,7 @@ pipeline {
             body: "Build succeeded! See details: ${env.BUILD_URL}"
             )
         }
+
         // Runs only if the build failed
         failure {
             echo 'Build or deployment failed! Sending failure notification...'
@@ -272,6 +274,31 @@ pipeline {
             body: "Build failed! See details: ${env.BUILD_URL}",
             attachLog: true,
             compressLog: true
+            )
+        }
+
+        // Runs only if the build is unstable
+        unstable {
+            echo 'Build or deployment failed! Sending failure notification...'
+            // mail to: 'devs@example.com',
+            //      subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "The build for ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. Check ${env.BUILD_URL}"
+            emailext(
+            from: 'loganathr20@gmail.com',
+            to: 'loganathr21@gmail.com',
+            subject: "[FAILED] ${env.JOB_NAME} #${env.BUILD_NUMBER} - Post Build Action - Unstable",
+            body: "Build failed! See details: ${env.BUILD_URL}",
+            attachLog: true,
+            compressLog: true
+            )
+        }
+
+        // Cleans up Workspace. 
+        cleanup {
+           echo "Cleaning up workspace..."
+            cleanWs(
+                deleteDirs: true,
+                disableDeferredWipeout: true
             )
         }
 
