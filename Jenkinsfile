@@ -14,7 +14,6 @@ def buildSummaryHtml() {
     """
 }
 
-
 def defaultDL = 'l_raja@hotmail.com'
 def PostbuildDL = 'loganathr21@gmail.com'
 
