@@ -152,11 +152,11 @@ pipeline {
                                             sourceFiles: 'target/*.war',
                                             removePrefix: 'target/',
                                             remoteDirectory: '/opt/tomcat/webapps/',
-                                            execCommand: '''
-                                            echo "Restarting Tomcat service..."
-                                            systemctl restart tomcat || echo "Tomcat restart failed!"
-                                            ''',
-                                            execTimeout: 120000
+                                            /*execCommand: '''
+                                             echo "Restarting Tomcat service..."
+                                             systemctl restart tomcat || echo "Tomcat restart failed!"
+                                            ''', 
+                                            execTimeout: 120000 */
                                             )
                                         ]
                                     )   
