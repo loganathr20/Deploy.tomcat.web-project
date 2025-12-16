@@ -42,13 +42,15 @@ def buildSummaryHtml() {
  * No existing logic disturbed
  */
 
+
 def getEnvAndDateInfo() {
+    def job = env.JOB_NAME?.toUpperCase()
     def envName = 'UNKNOWN'
 
-    if (env.JOB_NAME =~ /DEV/i)  { envName = 'DEV' }
-    if (env.JOB_NAME =~ /SIT/i)  { envName = 'SIT' }
-    if (env.JOB_NAME =~ /UAT/i)  { envName = 'UAT' }
-    if (env.JOB_NAME =~ /PROD/i) { envName = 'PROD' }
+    if (job.contains('DEV'))  { envName = 'DEV' }
+    if (job.contains('SIT'))  { envName = 'SIT' }
+    if (job.contains('UAT'))  { envName = 'UAT' }
+    if (job.contains('PROD')) { envName = 'PROD' }
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
