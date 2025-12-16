@@ -45,15 +45,21 @@ def buildSummaryHtml() {
  */
 
 
+
 def getEnvAndDateInfo() {
+    def name = env.JOB_NAME?.toUpperCase()
     def envName = 'UNKNOWN'
 
-    if (env.JOB_NAME?.toUpperCase().contains('PROD')) { envName = 'PROD' }
-    if (env.JOB_NAME?.toUpperCase().contains('UAT'))  { envName = 'UAT' }
-    if (env.JOB_NAME?.toUpperCase().contains('SIT'))  { envName = 'SIT' }
-    if (env.JOB_NAME?.toUpperCase().contains('DEV'))  { envName = 'DEV' }
+    if      (name?.startsWith('PROD-')) { envName = 'PROD' }
+    else if (name?.startsWith('UAT-'))  { envName = 'UAT' }
+    else if (name?.startsWith('SIT-'))  { envName = 'SIT' }
+    else if (name?.startsWith('DEV-'))  { envName = 'DEV' }
 
-    def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
+    def buildDate = new Date().format(
+        'dd-MMM-yyyy HH:mm:ss',
+        TimeZone.getTimeZone('Asia/Kolkata'),
+        Locale.ENGLISH
+    )
 
     return [envName: envName, buildDate: buildDate]
 }
@@ -270,5 +276,5 @@ pipeline {
         }
     }
 }
- 
+
 
