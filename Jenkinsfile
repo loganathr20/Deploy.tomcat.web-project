@@ -150,11 +150,11 @@ pipeline {
                                             removePrefix: 'target/',
                                             remoteDirectory: '/opt/tomcat/webapps/'
                                         )
-                                    ] 
-                                    )
-                                ]
-                            )
-                                echo 'Application deployed successfully.'
+                                    ]
+                                )
+                            ]
+                        )
+                        echo 'Application deployed successfully.'
                         } catch (err) {
                                 error "Deployment failed: ${err}"
                             }
