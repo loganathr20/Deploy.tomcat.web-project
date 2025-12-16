@@ -50,7 +50,7 @@ def getEnvAndDateInfo() {
     if (job.contains('DEV'))  { envName = 'DEV' }
     if (job.contains('SIT'))  { envName = 'SIT' }
     if (job.contains('UAT'))  { envName = 'UAT' }
-    if (job.contains('PROD')) { envName = 'PROD' }
+    if (job.contains('PROD')) { envName = 'PROD'}
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
@@ -72,7 +72,8 @@ def finalEmailList = null
 
 // END of PIPELINE Customation for Email Notification and Lightweight Automation 
 
-pipeline {
+pipeline { 
+    
     agent any
 
     environment {
@@ -149,7 +150,7 @@ pipeline {
                                     configName: 'tomcat',
                                     verbose: true,
                                     transfers: [
-                                        sshTransfer(
+                                        sshTransfer (
                                             sourceFiles: 'target/*.war',
                                             removePrefix: 'target/',
                                             remoteDirectory: '/opt/tomcat/webapps/'
@@ -269,5 +270,6 @@ pipeline {
     }
 } 
 
+}
 
 
