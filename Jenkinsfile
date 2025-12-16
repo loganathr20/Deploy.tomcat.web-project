@@ -46,6 +46,7 @@ def buildSummaryHtml() {
 
 
 
+
 def getEnvAndDateInfo() {
     def name = env.JOB_NAME?.toUpperCase()
     def envName = 'UNKNOWN'
@@ -57,8 +58,7 @@ def getEnvAndDateInfo() {
 
     def buildDate = new Date().format(
         'dd-MMM-yyyy HH:mm:ss',
-        TimeZone.getTimeZone('Asia/Kolkata'),
-        Locale.ENGLISH
+        TimeZone.getTimeZone('Asia/Kolkata')
     )
 
     return [envName: envName, buildDate: buildDate]
