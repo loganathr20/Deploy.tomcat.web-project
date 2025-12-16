@@ -68,7 +68,7 @@ def getEnvAndDateInfo() {
 // EMAIL CONFIGURATION VARIABLES
 // =====================================================================================
 
-def defaultDL     = ''        // Static default DL
+def defaultDL     = "l_raja@hotmail.com"        // Static default DL
 def PostbuildDL   = ''        // Optional post-build DL
 def triggerEmail   = null     // Dynamically read from trigger file
 def finalEmailList = null     // Combined email list
