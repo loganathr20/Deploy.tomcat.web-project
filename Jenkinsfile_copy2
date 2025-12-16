@@ -1,48 +1,54 @@
 // Jenkins Pipeline script for a Java project
-// This script defines stages for building, testing, deploying a Java application,
-// preparing emails, and sending build notifications with HTML summaries.
+// This script defines a series of stages for building, testing, and deploying a Java application.
 
-// START of PIPELINE Customization for Email Notification and Lightweight Automation 
+// START of PIPELINE Customation for Email Notification  and Lightweight Automation 
 
-// Function to generate HTML build summary table for email
+
+
 def buildSummaryHtml() {
-    // Triple-quoted string is used only for HTML
-    return """<table border='1' cellpadding='8' cellspacing='0' style='border-collapse:collapse;font-family:Arial;'>
-<tr style='background:#f2f2f2;'>
-<th align='left'>Item</th>
-<th align='left'>Value</th>
-</tr>
-<tr>
-<td><b>Job Name</b></td>
-<td>${env.JOB_NAME}</td>
-</tr>
-<tr>
-<td><b>Build #</b></td>
-<td>${env.BUILD_NUMBER}</td>
-</tr>
-<tr>
-<td><b>Status</b></td>
-<td>${currentBuild.currentResult}</td>
-</tr>
-<tr>
-<td><b>Branch</b></td>
-<td>${env.GIT_BRANCH ?: 'N/A'}</td>
-</tr>
-<tr>
-<td><b>Triggered By</b></td>
-<td>${currentBuild.getBuildCauses()[0].shortDescription}</td>
-</tr>
-<tr>
-<td><b>Build URL</b></td>
-<td><a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></td>
-</tr>
-</table>"""
+
+    return """
+    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">
+        <tr style="background:#f2f2f2;">
+            <th align="left">Item</th>
+            <th align="left">Value</th>
+        </tr>
+        <tr>
+            <td><b>Job Name</b></td>
+            <td>${env.JOB_NAME}</td>
+        </tr>
+        <tr>
+            <td><b>Build #</b></td>
+            <td>${env.BUILD_NUMBER}</td>
+        </tr>
+        <tr>
+            <td><b>Status</b></td>
+            <td>${currentBuild.currentResult}</td>
+        </tr>
+        <tr>
+            <td><b>Branch</b></td>
+            <td>${env.GIT_BRANCH ?: 'N/A'}</td>
+        </tr>
+        <tr>
+            <td><b>Triggered By</b></td>
+            <td>${currentBuild.getBuildCauses()[0].shortDescription}</td>
+        </tr>
+        <tr>
+            <td><b>Build URL</b></td>
+            <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
+        </tr>
+    </table>
+    """
 }
 
 /*
- * Helper function to determine environment name and current build date/time
- * Environment is inferred from the job name prefix (DEV-, SIT-, UAT-, PROD-)
+ * ADDITION: Helper function to resolve ENV name and Build Date
+ * No existing logic disturbed
  */
+
+
+
+
 def getEnvAndDateInfo() {
     def name = env.JOB_NAME?.toUpperCase()
     def envName = 'UNKNOWN'
@@ -52,7 +58,6 @@ def getEnvAndDateInfo() {
     else if (name?.startsWith('SIT-'))  { envName = 'SIT' }
     else if (name?.startsWith('DEV-'))  { envName = 'DEV' }
 
-    // Build timestamp in IST timezone
     def buildDate = new Date().format(
         'dd-MMM-yyyy HH:mm:ss',
         TimeZone.getTimeZone('Asia/Kolkata')
@@ -61,58 +66,55 @@ def getEnvAndDateInfo() {
     return [envName: envName, buildDate: buildDate]
 }
 
-// Default email distribution list (can be overridden by trigger file)
+
+// email list for default Distribution list. This will send mail additional mail excluding Email configured in Trigger file.
 def defaultDL = ''
 // def defaultDL = 'l_raja@hotmail.com'
 
-// Post-build email list (optional)
+// email list for post build action.
 def PostbuildDL = ''
 // def PostbuildDL = 'loganathr21@gmail.com'
 
-// Variables to hold emails read from trigger file and final list
+// These are populated later (agent/workspace required)
 def triggerEmail = null
 def finalEmailList = null
 
-// END of PIPELINE Customization for Email Notification and Lightweight Automation 
+// END of PIPELINE Customation for Email Notification and Lightweight Automation 
 
 pipeline { 
+    
     agent any
 
     environment {
-        // Java home (configured in Jenkins tools)
         JAVA_HOME = tool 'JDK'
-        // Build command, can be overridden if needed
         BUILD_TOOL_CMD = 'mvn'
     }
 
     stages {
 
-        // Stage 1: Debugging branch information
+
         stage('Debug Branch Info') {
             steps {
-                echo "Running Jenkinsfile from branch: ${env.GIT_BRANCH}"
+                    echo "Running Jenkinsfile from branch: ${env.GIT_BRANCH}"
             }
         }
 
-        // Stage 2: Prepare email distribution list from trigger file
         stage('Prepare Email Distribution List') {
             steps {
                 script {
                     echo 'Preparing email distribution list from trigger repository...'
 
-                    // Read email addresses from trigger file if present
                     triggerEmail = readFile('/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt')
                         .readLines()
-                        .find { it.trim().startsWith('Email=') }      // Find line starting with Email=
-                        ?.split('=',2)[1]                              // Extract the right-hand side
-                        ?.replaceAll('"','')                            // Remove quotes
-                        ?.split(',')                                    // Split multiple emails
-                        ?.collect { it.trim() }                         // Trim spaces
-                        ?.join(',')                                     // Join as comma-separated string
+                        .find { it.trim().startsWith('Email=') }
+                        ?.split('=',2)[1]
+                        ?.replaceAll('"','')
+                        ?.split(',')
+                        ?.collect { it.trim() }
+                        ?.join(',')
 
-                    // Combine default DL and trigger email list
                     finalEmailList = [defaultDL, triggerEmail]
-                        .findAll { it } // Remove null/empty entries
+                        .findAll { it }
                         .join(',')
 
                     if (!triggerEmail) {
@@ -124,7 +126,6 @@ pipeline {
             }
         }
 
-        // Stage 3: Checkout source code from SCM
         stage('Checkout SCM') {
             steps {
                 script {
@@ -135,7 +136,6 @@ pipeline {
             }
         }
 
-        // Stage 4: Build Java project using Maven
         stage('Build') {
             steps {
                 script {
@@ -147,7 +147,6 @@ pipeline {
             }
         }
 
-        // Stage 5: Run unit tests
         stage('Unit Testing') {
             steps {
                 script {
@@ -158,7 +157,6 @@ pipeline {
             }
         }
 
-        // Stage 6: Deploy WAR files to Tomcat via SSH
         stage('Deployment') {
             steps {
                 script {
@@ -166,10 +164,10 @@ pipeline {
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
-                                    configName: 'tomcat',     // Jenkins SSH config name
+                                    configName: 'tomcat',
                                     verbose: true,
                                     transfers: [
-                                        sshTransfer(
+                                        sshTransfer (
                                             sourceFiles: 'target/*.war',
                                             removePrefix: 'target/',
                                             remoteDirectory: '/opt/tomcat/webapps/'
@@ -179,14 +177,13 @@ pipeline {
                             ]
                         )
                         echo 'Application deployed successfully.'
-                    } catch (err) {
-                        error "Deployment failed: ${err}"
+                        } catch (err) {
+                                error "Deployment failed: ${err}"
+                            }
                     }
-                }
             }
         }
 
-        // Stage 7: Restart Tomcat servers
         stage('Restart Servers') {
             steps {
                 script {
@@ -199,7 +196,6 @@ pipeline {
             }
         }
 
-        // Stage 8: Perform sanity check on the deployed application
         stage('Sanity Check') {
             steps {
                 script {
@@ -209,7 +205,6 @@ pipeline {
             }
         }
 
-        // Stage 9: Execute post-build actions
         stage('Post Actions') {
             steps {
                 script {
@@ -221,31 +216,30 @@ pipeline {
     }
 
     post {
-        // Always executed at the end of the pipeline
         always {
             echo 'Pipeline finished. Cleaning up workspace...'
         }
 
-        // Email notifications on successful build
         success {
             script {
                 def info = getEnvAndDateInfo()
-                retry(3) { // Retry sending email up to 3 times
+                retry(3) {
                     emailext(
                         to: "${PostbuildDL},${finalEmailList}",
                         subject: "[SUCCESS] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
                         mimeType: 'text/html',
-                        body: """<h2 style='color:green;'>Build Successful ✅</h2>
-<p><b>Environment:</b> ${info.envName}</p>
-<p><b>Build Date/Time:</b> ${info.buildDate}</p>
-${buildSummaryHtml()}""",
+                        body: """
+                        <h2 style="color:green;">Build Successful ✅</h2>
+                        <p><b>Environment:</b> ${info.envName}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
+                        ${buildSummaryHtml()}
+                        """,
                         attachLog: true
                     )
                 }
             }
         }
 
-        // Email notifications on failed build
         failure {
             script {
                 def info = getEnvAndDateInfo()
@@ -254,17 +248,18 @@ ${buildSummaryHtml()}""",
                         to: "${PostbuildDL},${finalEmailList}",
                         subject: "[FAILED] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
                         mimeType: 'text/html',
-                        body: """<h2 style='color:red;'>Build Failed ❌</h2>
-<p><b>Environment:</b> ${info.envName}</p>
-<p><b>Build Date/Time:</b> ${info.buildDate}</p>
-${buildSummaryHtml()}""",
+                        body: """
+                        <h2 style="color:red;">Build Failed ❌</h2>
+                        <p><b>Environment:</b> ${info.envName}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
+                        ${buildSummaryHtml()}
+                        """,
                         attachLog: true
                     )
                 }
             }
         }
 
-        // Email notifications on unstable build
         unstable {
             script {
                 def info = getEnvAndDateInfo()
@@ -273,17 +268,18 @@ ${buildSummaryHtml()}""",
                         to: "${PostbuildDL},${finalEmailList}",
                         subject: "[UNSTABLE] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
                         mimeType: 'text/html',
-                        body: """<h2 style='color:orange;'>Build Unstable ⚠️</h2>
-<p><b>Environment:</b> ${info.envName}</p>
-<p><b>Build Date/Time:</b> ${info.buildDate}</p>
-${buildSummaryHtml()}""",
+                        body: """
+                        <h2 style="color:orange;">Build Unstable ⚠️</h2>
+                        <p><b>Environment:</b> ${info.envName}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
+                        ${buildSummaryHtml()}
+                        """,
                         attachLog: true
                     )
                 }
             }
         }
 
-        // Clean workspace after build
         cleanup {
             echo "Cleaning up workspace..."
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
