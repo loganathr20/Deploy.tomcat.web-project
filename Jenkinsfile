@@ -150,15 +150,15 @@ pipeline {
                                             removePrefix: 'target/',
                                             remoteDirectory: '/opt/tomcat/webapps/'
                                         )
-                                    ]
-                                )
-                            ]
-                        )
-                        echo 'Application deployed successfully.'
-                    } catch (err) {
-                        error "Deployment failed: ${err}"
+                                    ] 
+                                    )
+                                ]
+                            )
+                                echo 'Application deployed successfully.'
+                        } catch (err) {
+                                error "Deployment failed: ${err}"
+                            }
                     }
-                }
             }
         }
 
@@ -263,6 +263,7 @@ pipeline {
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
         }
     }
-}
+} 
+
 
 
