@@ -4,30 +4,17 @@
 //
 // PURPOSE
 // -------
-// This Jenkins pipeline provides a complete CI/CD workflow for a Java WAR-based
-// application deployed on Apache Tomcat.
-//
-// The pipeline performs:
-//   - Source checkout
-//   - Maven build & unit testing
-//   - Safe deployment to Tomcat
-//   - Remote backup of existing WAR
-//   - Automatic rollback on deployment or restart failure
-//   - HTML email notifications with build summary
+// Complete CI/CD pipeline for Java WAR-based application.
+// Handles build, test, deploy, rollback, restart, and notifications.
 //
 // BACKUP LOCATION (REMOTE TOMCAT SERVER)
 // -------------------------------------
-// The currently deployed WAR is backed up dynamically using its real filename.
-// Backup is created in the SAME directory as the WAR.
-//
-// Example:
-//     /opt/tomcat/webapps/dtw-1.0.0.war
-//     /opt/tomcat/webapps/dtw-1.0.0.war.bak
+// Existing WARs are backed up dynamically before deployment:
+//     /opt/tomcat/webapps/<actual-war-name>.bak
 //
 // NOTE
 // ----
-// VS Code Groovy “brackets do not match” warnings are known false positives
-// and do NOT affect Jenkins execution.
+// VS Code Groovy warnings are known false positives.
 // =====================================================================================
 
 
@@ -38,8 +25,8 @@
 /*
  * buildSummaryHtml()
  * ------------------
- * Generates a small HTML table summarizing the Jenkins build.
- * This HTML is embedded in all email notifications (SUCCESS / FAILURE / UNSTABLE).
+ * Generates an HTML table summarizing the Jenkins build.
+ * This table is used in all email notifications.
  */
 def buildSummaryHtml() {
     return '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">' +
@@ -56,14 +43,10 @@ def buildSummaryHtml() {
 /*
  * getEnvAndDateInfo()
  * ------------------
- * Determines:
- *   - Environment name (DEV / SIT / UAT / PROD) based on job naming convention
- *   - Build timestamp in IST timezone
- *
- * This information is used in email subject lines and email bodies.
+ * Determines the environment name (DEV/SIT/UAT/PROD) from job name
+ * and returns the build timestamp in IST.
  */
 def getEnvAndDateInfo() {
-
     def jobNameUpper = (env.JOB_NAME ?: '').toUpperCase()
     def envName = 'UNKNOWN'
 
@@ -84,17 +67,12 @@ def getEnvAndDateInfo() {
 // =====================================================================================
 // EMAIL CONFIGURATION VARIABLES
 // =====================================================================================
-//
-// defaultDL     : Static default email distribution list
-// PostbuildDL   : Optional post-build distribution list
-// triggerEmail  : Email(s) read dynamically from trigger file
-// finalEmailList: Combined final list used for notifications
-//
-def defaultDL     = ''
-def PostbuildDL   = ''
 
-def triggerEmail   = null
-def finalEmailList = null
+def defaultDL     = ''        // Static default DL
+def PostbuildDL   = ''        // Optional post-build DL
+def triggerEmail   = null     // Dynamically read from trigger file
+def finalEmailList = null     // Combined email list
+def rollbackExecuted = false  // Tracks if rollback was executed during deployment/restart
 
 
 // =====================================================================================
@@ -103,21 +81,18 @@ def finalEmailList = null
 
 pipeline {
 
-    // Any available Jenkins agent can execute this pipeline
     agent any
 
-    // Global environment variables for tools and commands
     environment {
-        JAVA_HOME      = tool 'JDK'
-        BUILD_TOOL_CMD = 'mvn'
+        JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
+        BUILD_TOOL_CMD = 'mvn'                // Maven command
     }
 
     stages {
 
         // -------------------------------------------------------------------------
-        // DEBUG INFORMATION
+        // DEBUG: BRANCH INFO
         // -------------------------------------------------------------------------
-        // Helps identify which Git branch triggered the pipeline
         stage('Debug Branch Info') {
             steps {
                 echo "Running Jenkinsfile from branch: ${env.GIT_BRANCH}"
@@ -125,10 +100,8 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // EMAIL DISTRIBUTION LIST PREPARATION
+        // PREPARE EMAIL DISTRIBUTION LIST
         // -------------------------------------------------------------------------
-        // Reads a trigger file to dynamically fetch email recipients.
-        // Safe failure handling is included if the file is missing.
         stage('Prepare Email Distribution List') {
             steps {
                 script {
@@ -154,7 +127,7 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // SOURCE CODE CHECKOUT
+        // SCM CHECKOUT
         // -------------------------------------------------------------------------
         stage('Checkout SCM') {
             steps {
@@ -165,7 +138,6 @@ pipeline {
         // -------------------------------------------------------------------------
         // BUILD STAGE
         // -------------------------------------------------------------------------
-        // Compiles the project and generates the WAR artifact.
         stage('Build') {
             steps {
                 sh "${BUILD_TOOL_CMD} clean install -DskipTests"
@@ -186,20 +158,15 @@ pipeline {
         // =================================================================================
         // DEPLOYMENT WITH REMOTE BACKUP & ROLLBACK (PRODUCTION SAFE)
         // =================================================================================
-        // This stage:
-        //   1. Detects the currently deployed WAR on Tomcat
-        //   2. Creates a backup (<war>.bak)
-        //   3. Deploys the new WAR
-        //   4. Rolls back automatically on failure
         stage('Deployment') {
             steps {
                 script {
+                    rollbackExecuted = false  // reset flag at deployment start
                     try {
 
-                        // -----------------------------------------------------------------
+                        // -----------------------------
                         // REMOTE BACKUP STEP
-                        // -----------------------------------------------------------------
-                        // Detects the real WAR name dynamically and creates a .bak file.
+                        // -----------------------------
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
@@ -222,9 +189,9 @@ pipeline {
                             ]
                         )
 
-                        // -----------------------------------------------------------------
+                        // -----------------------------
                         // DEPLOY NEW WAR
-                        // -----------------------------------------------------------------
+                        // -----------------------------
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
@@ -246,10 +213,11 @@ pipeline {
                     } catch (err) {
 
                         echo 'Deployment failed — performing remote rollback'
+                        rollbackExecuted = true
 
-                        // -----------------------------------------------------------------
-                        // REMOTE ROLLBACK STEP
-                        // -----------------------------------------------------------------
+                        // -----------------------------
+                        // REMOTE ROLLBACK
+                        // -----------------------------
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
@@ -283,22 +251,53 @@ pipeline {
         // -------------------------------------------------------------------------
         stage('Restart Servers') {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: 'tomcat',
-                            verbose: true,
-                            transfers: [
-                                sshTransfer(
-                                    execCommand: '''
-                                        sudo systemctl restart tomcat
-                                        sudo systemctl status tomcat
-                                    '''
+                script {
+                    try {
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                sudo systemctl restart tomcat
+                                                sudo systemctl status tomcat
+                                            '''
+                                        )
+                                    ]
                                 )
                             ]
                         )
-                    ]
-                )
+                    } catch (err) {
+                        echo 'Restart failed — performing remote rollback'
+                        rollbackExecuted = true
+
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                BAK=$(ls /opt/tomcat/webapps/*.war.bak 2>/dev/null | head -1)
+                                                if [ -n "$BAK" ]; then
+                                                    mv "$BAK" "${BAK%.bak}"
+                                                    sudo systemctl restart tomcat
+                                                    echo "Rollback completed after restart failure"
+                                                else
+                                                    echo "Backup WAR not found — rollback skipped"
+                                                fi
+                                            '''
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                        error "Restart failed after rollback: ${err}"
+                    }
+                }
             }
         }
 
@@ -313,7 +312,7 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // POST ACTION PLACEHOLDER
+        // POST ACTIONS (placeholder)
         // -------------------------------------------------------------------------
         stage('Post Actions') {
             steps {
@@ -323,16 +322,18 @@ pipeline {
     }
 
     // =================================================================================
-    // POST-BUILD ACTIONS
-    // =====================================================================================
+    // POST-BUILD ACTIONS (EMAIL + CLEANUP)
+    // =================================================================================
     post {
 
-        // Always clean workspace after pipeline completion
+        // Always clean workspace after build
         always {
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
         }
 
-        // SUCCESS EMAIL NOTIFICATION
+        // -----------------------------
+        // SUCCESS EMAIL
+        // -----------------------------
         success {
             script {
                 def info = getEnvAndDateInfo()
@@ -345,6 +346,7 @@ pipeline {
                             '<h2 style="color:green;">Build Successful ✅</h2>' +
                             '<p><b>Environment:</b> ' + info.envName + '</p>' +
                             '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
+                            '<p><b>Rollback Executed:</b> No</p>' +
                             buildSummaryHtml(),
                         attachLog: true
                     )
@@ -352,7 +354,9 @@ pipeline {
             }
         }
 
-        // FAILURE EMAIL NOTIFICATION
+        // -----------------------------
+        // FAILURE EMAIL
+        // -----------------------------
         failure {
             script {
                 def info = getEnvAndDateInfo()
@@ -365,6 +369,7 @@ pipeline {
                             '<h2 style="color:red;">Build Failed ❌</h2>' +
                             '<p><b>Environment:</b> ' + info.envName + '</p>' +
                             '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
+                            '<p><b>Rollback Executed:</b> ' + (rollbackExecuted ? 'Yes' : 'No') + '</p>' +
                             buildSummaryHtml(),
                         attachLog: true
                     )
@@ -372,7 +377,9 @@ pipeline {
             }
         }
 
-        // UNSTABLE EMAIL NOTIFICATION
+        // -----------------------------
+        // UNSTABLE EMAIL
+        // -----------------------------
         unstable {
             script {
                 def info = getEnvAndDateInfo()
@@ -385,6 +392,7 @@ pipeline {
                             '<h2 style="color:orange;">Build Unstable ⚠️</h2>' +
                             '<p><b>Environment:</b> ' + info.envName + '</p>' +
                             '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
+                            '<p><b>Rollback Executed:</b> ' + (rollbackExecuted ? 'Yes' : 'No') + '</p>' +
                             buildSummaryHtml(),
                         attachLog: true
                     )
@@ -401,29 +409,48 @@ pipeline {
 /*
 PIPELINE FLOW
 -------------
-Checkout → Build → Test → Backup → Deploy → Restart → Sanity → Notify
+1. Debug Branch Info
+2. Prepare Email Distribution List
+3. Checkout SCM
+4. Build (Maven clean install)
+5. Unit Testing
+6. Deployment with Remote Backup
+7. Restart Servers with rollback safety
+8. Sanity Check
+9. Post Actions
+10. Post-Build Email + Workspace Cleanup
 
 BACKUP LOCATION
 ---------------
-/opt/tomcat/webapps/<actual-war-name>.bak
+/opt/tomcat/webapps/<actual-war-name>.bak   (on remote Tomcat server)
 
 ROLLBACK CONDITIONS
 -------------------
 • Deployment failure
 • Tomcat restart failure
 
-WHY THIS IS SAFE
-----------------
-✔ Backup created before deployment
-✔ Rollback is atomic (mv)
+ROLLBACK VISIBILITY
+-------------------
+• rollbackExecuted flag added
+• Email body shows: "Rollback Executed: Yes/No"
+• Jenkins console logs show full rollback commands and outputs
+
+WHY THIS PIPELINE IS SAFE
+-------------------------
+✔ Dynamic backup creation before deployment
+✔ Automatic rollback on failure
+✔ Rollback visible in failure emails
+✔ Workspace cleanup always executed
+✔ Supports multiple environments (DEV/SIT/UAT/PROD)
 ✔ No manual intervention required
-✔ Preserves last known good WAR
+✔ Keeps last known good WAR safe
 
-IMPORTANT NOTE
---------------
-All backup and rollback operations run on the
-REMOTE TOMCAT SERVER via SSH Publisher.
-
+ADDITIONAL NOTES
+----------------
+- SSH Publisher plugin used for remote backup and deployment
+- WAR file detected dynamically to avoid hardcoding
+- HTML emails provide clear build summary
+- Retry mechanism (3x) included for email delivery
 =======================================================================================
 */
 
