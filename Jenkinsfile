@@ -3,6 +3,8 @@
 
 // START of PIPELINE Customation for Email Notification  and Lightweight Automation 
 
+echo "Running Jenkinsfile from branch: ${env.GIT_BRANCH}"
+
 def buildSummaryHtml() {
 
     return """
