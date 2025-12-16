@@ -238,3 +238,88 @@ pipeline {
 }
 
 
+
+
+/*
+
+README for Jenkinsfile standard. 
+===================== PIPELINE FLOW DOCUMENTATION =====================
+
+Pipeline Flow Overview:
+
+[Start] 
+   |
+   v
+[Debug Branch Info] -----------------------+
+   |                                      |
+   v                                      |
+[Prepare Email Distribution List]         |
+   |                                      |
+   v                                      |
+[Checkout SCM]                             |
+   |                                      |
+   v                                      |
+[Build (Maven clean install)]              |
+   |                                      |
+   v                                      |
+[Unit Testing]                             |
+   |                                      |
+   v                                      |
+[Deployment (SSH to Tomcat)]              |
+   |                                      |
+   v                                      |
+[Restart Servers]                          |
+   |                                      |
+   v                                      |
+[Sanity Check]                              |
+   |                                      |
+   v                                      |
+[Post Actions]                              |
+   |                                      |
+   +--------------------------------------+
+   |
+   v
+[Post-Build Actions]
+   |
+   +--> Success --> Send HTML Email ✅
+   |
+   +--> Failure --> Send HTML Email ❌
+   |
+   +--> Unstable --> Send HTML Email ⚠️
+   |
+   +--> Always --> Clean Workspace
+
+===================== LEGEND / NOTES =====================
+
+1. Stages:
+   - Sequential execution from top to bottom
+   - Each stage has a specific responsibility (debug, build, test, deploy, restart, sanity, post-actions)
+
+2. Email Notifications:
+   - Triggered after pipeline completion based on build status
+   - Uses 'emailext' to send HTML emails
+   - Status types: SUCCESS, FAILURE, UNSTABLE
+
+3. Retry Mechanism:
+   - Each email is retried up to 3 times to handle transient failures
+
+4. Email Variables:
+   - defaultDL: Default distribution list if trigger file is missing
+   - triggerEmail: Email(s) read from trigger file
+   - finalEmailList: Combined list used for sending emails
+
+5. Helper Functions:
+   - buildSummaryHtml(): Returns an HTML table with job name, build number, status, branch, triggered by, and build URL
+   - getEnvAndDateInfo(): Determines environment name (DEV/SIT/UAT/PROD) and current build date/time (IST)
+
+6. Notes on Jenkinsfile Syntax:
+   - Triple-quoted strings with '${}' used in emails are rewritten with concatenation to avoid VSCode false warnings
+   - Workspace cleanup is done in 'always' post action using cleanWs()
+   - SSH deployment is configured via Jenkins SSH Publisher plugin
+
+7. Additional Info:
+   - This diagram and notes are for documentation only and do not affect pipeline execution
+   - Use this section to quickly understand pipeline flow and email notification logic
+
+=====================================================================
+*/
