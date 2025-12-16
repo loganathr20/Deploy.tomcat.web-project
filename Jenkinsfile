@@ -4,49 +4,32 @@
 //
 // PURPOSE
 // -------
-// This pipeline performs the following:
-//   1. Checkout source code
-//   2. Build Java WAR using Maven
-//   3. Execute unit tests
-//   4. Deploy WAR to Tomcat using SSH Publisher
-//   5. Perform SAFE deployment with rollback on failure
-//   6. Restart Tomcat safely
-//   7. Send HTML email notifications (SUCCESS / FAILURE / UNSTABLE)
+// End-to-end CI/CD pipeline for Java WAR applications.
+// Handles build, test, deploy, rollback, restart, and notifications.
 //
-// DESIGN PRINCIPLES
-// -----------------
-// ✔ No destructive changes without backup
-// ✔ Explicit rollback on failure
-// ✔ Post-build email notifications only
-// ✔ Retry-safe email delivery
-// ✔ Readable, auditable, production-ready
+// BACKUP LOCATION
+// ---------------
+// Existing WAR is backed up to:
+//     /opt/tomcat/webapps/app.war.bak
+// Used for all rollback scenarios.
 //
-// IMPORTANT NOTE
-// --------------
-// VS Code may show "brackets do not match" warnings for Groovy/Jenkins DSL.
-// This is a known false-positive and does NOT affect execution.
+// NOTE
+// ----
+// VS Code Groovy warnings are known false positives.
 // =====================================================================================
 
 
 // =====================================================================================
-// ============================== HELPER FUNCTIONS ======================================
+// HELPER FUNCTIONS
 // =====================================================================================
 
 /*
- * FUNCTION: buildSummaryHtml()
- * ----------------------------
- * Generates an HTML table summarizing the Jenkins build.
- * Used in all email notifications (success/failure/unstable).
- *
- * Why HTML?
- * - Improves readability
- * - Easy for stakeholders to scan key info
+ * Builds an HTML summary table used in email notifications.
+ * Keeps email content consistent across all build results.
  */
 def buildSummaryHtml() {
     return '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">' +
-           '<tr style="background:#f2f2f2;">' +
-           '<th align="left">Item</th><th align="left">Value</th>' +
-           '</tr>' +
+           '<tr style="background:#f2f2f2;"><th align="left">Item</th><th align="left">Value</th></tr>' +
            '<tr><td><b>Job Name</b></td><td>' + (env.JOB_NAME ?: 'N/A') + '</td></tr>' +
            '<tr><td><b>Build #</b></td><td>' + (env.BUILD_NUMBER ?: 'N/A') + '</td></tr>' +
            '<tr><td><b>Status</b></td><td>' + currentBuild.currentResult + '</td></tr>' +
@@ -54,24 +37,14 @@ def buildSummaryHtml() {
            '<tr><td><b>Triggered By</b></td><td>' +
                (currentBuild.getBuildCauses()?.getAt(0)?.shortDescription ?: 'N/A') +
            '</td></tr>' +
-           '<tr><td><b>Build URL</b></td><td>' +
-           '<a href="' + env.BUILD_URL + '">' + env.BUILD_URL + '</a>' +
-           '</td></tr>' +
+           '<tr><td><b>Build URL</b></td><td><a href="' + env.BUILD_URL + '">' +
+               env.BUILD_URL + '</a></td></tr>' +
            '</table>'
 }
 
 /*
- * FUNCTION: getEnvAndDateInfo()
- * -----------------------------
- * Determines:
- *   - Environment name (DEV / SIT / UAT / PROD)
- *   - Build timestamp in IST timezone
- *
- * Environment is derived from job naming convention:
- *   DEV-xxx  → DEV
- *   SIT-xxx  → SIT
- *   UAT-xxx  → UAT
- *   PROD-xxx → PROD
+ * Determines environment name from job naming convention
+ * and formats build date/time in IST timezone.
  */
 def getEnvAndDateInfo() {
 
@@ -93,30 +66,30 @@ def getEnvAndDateInfo() {
 
 
 // =====================================================================================
-// ========================== EMAIL CONFIGURATION =======================================
+// EMAIL CONFIGURATION
 // =====================================================================================
 
-// Default distribution list (can be empty or static DL)
+// Static/default email distribution list
 def defaultDL = ''
 
-// Post-build DL (example: ops team / release team)
+// Post-build distribution list (Ops / Release / Support)
 def PostbuildDL = ''
 
-// Variables resolved dynamically at runtime
+// Dynamically resolved email lists
 def triggerEmail   = null
 def finalEmailList = null
 
 
 // =====================================================================================
-// ============================== PIPELINE DEFINITION ===================================
+// PIPELINE DEFINITION
 // =====================================================================================
 
 pipeline {
 
-    // Any available Jenkins agent
+    // Run on any available Jenkins agent
     agent any
 
-    // Global environment variables
+    // Global tools and environment variables
     environment {
         JAVA_HOME      = tool 'JDK'
         BUILD_TOOL_CMD = 'mvn'
@@ -125,7 +98,7 @@ pipeline {
     stages {
 
         // -------------------------------------------------------------------------
-        // DEBUG STAGE
+        // Displays branch information for debugging and audit clarity
         // -------------------------------------------------------------------------
         stage('Debug Branch Info') {
             steps {
@@ -134,13 +107,13 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // EMAIL DISTRIBUTION LIST PREPARATION
+        // Resolves email recipients from external trigger file
+        // Falls back gracefully if file is missing
         // -------------------------------------------------------------------------
         stage('Prepare Email Distribution List') {
             steps {
                 script {
                     try {
-                        // Reads email recipients from external trigger file
                         triggerEmail = readFile(
                             '/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt'
                         )
@@ -155,7 +128,6 @@ pipeline {
                         echo 'Trigger email file not found or unreadable'
                     }
 
-                    // Combine default DL + trigger DL safely
                     finalEmailList = [defaultDL, triggerEmail].findAll { it }.join(',')
                     echo "Final email list resolved as: ${finalEmailList ?: defaultDL}"
                 }
@@ -163,7 +135,7 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // SOURCE CODE CHECKOUT
+        // Source code checkout from configured SCM
         // -------------------------------------------------------------------------
         stage('Checkout SCM') {
             steps {
@@ -172,17 +144,19 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // BUILD STAGE
+        // Maven build and artifact archival
+        // WAR is fingerprinted for traceability
         // -------------------------------------------------------------------------
         stage('Build') {
             steps {
                 sh "${BUILD_TOOL_CMD} clean install -DskipTests"
                 archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
+                fingerprint 'target/*.war'
             }
         }
 
         // -------------------------------------------------------------------------
-        // UNIT TESTING STAGE
+        // Executes unit tests
         // -------------------------------------------------------------------------
         stage('Unit Testing') {
             steps {
@@ -191,23 +165,24 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // DEPLOYMENT STAGE (WITH ROLLBACK)
+        // Deployment with backup and rollback safety
+        // Backup Path: /opt/tomcat/webapps/app.war.bak
         // -------------------------------------------------------------------------
         stage('Deployment') {
             steps {
                 script {
                     try {
 
-                        // Backup existing WAR for rollback safety
+                        // Backup existing WAR before deploying new artifact
                         sh '''
                             if [ -f /opt/tomcat/webapps/app.war ]; then
                                 cp /opt/tomcat/webapps/app.war \
                                    /opt/tomcat/webapps/app.war.bak
-                                echo "Existing WAR backed up"
+                                echo "Backup created at /opt/tomcat/webapps/app.war.bak"
                             fi
                         '''
 
-                        // Deploy new WAR via SSH Publisher
+                        // Deploy WAR to Tomcat using SSH Publisher
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
@@ -228,16 +203,14 @@ pipeline {
 
                     } catch (err) {
 
-                        echo 'Deployment failed — initiating rollback'
+                        // Restore backup WAR if deployment fails
+                        echo 'Deployment failed — performing rollback'
 
-                        // Rollback to previous WAR
                         sh '''
                             if [ -f /opt/tomcat/webapps/app.war.bak ]; then
                                 mv /opt/tomcat/webapps/app.war.bak \
                                    /opt/tomcat/webapps/app.war
                                 echo "Rollback completed"
-                            else
-                                echo "No backup WAR found — rollback skipped"
                             fi
                         '''
 
@@ -248,7 +221,7 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // TOMCAT RESTART STAGE (WITH ROLLBACK)
+        // Restarts Tomcat and rolls back if restart fails
         // -------------------------------------------------------------------------
         stage('Restart Servers') {
             steps {
@@ -258,7 +231,7 @@ pipeline {
                         sh 'sudo systemctl status tomcat'
                     } catch (err) {
 
-                        echo 'Restart failed — restoring previous WAR'
+                        echo 'Restart failed — restoring backup WAR'
 
                         sh '''
                             if [ -f /opt/tomcat/webapps/app.war.bak ]; then
@@ -275,16 +248,19 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // SANITY CHECK STAGE
+        // Lightweight sanity validation (non-blocking)
         // -------------------------------------------------------------------------
         stage('Sanity Check') {
             steps {
-                echo 'Sanity checks completed (placeholder)'
+                script {
+                    echo 'Performing basic sanity check'
+                    sh 'curl -m 5 -s http://localhost:8080 || true'
+                }
             }
         }
 
         // -------------------------------------------------------------------------
-        // POST ACTION STAGE (LOGICAL END OF PIPELINE)
+        // Logical end-of-pipeline marker
         // -------------------------------------------------------------------------
         stage('Post Actions') {
             steps {
@@ -294,16 +270,16 @@ pipeline {
     }
 
     // =================================================================================
-    // ============================= POST-BUILD ACTIONS ================================
+    // POST-BUILD ACTIONS
     // =================================================================================
     post {
 
-        // Always clean workspace
+        // Workspace cleanup always runs
         always {
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
         }
 
-        // SUCCESS EMAIL
+        // Success notification
         success {
             script {
                 def info = getEnvAndDateInfo()
@@ -323,7 +299,7 @@ pipeline {
             }
         }
 
-        // FAILURE EMAIL
+        // Failure notification
         failure {
             script {
                 def info = getEnvAndDateInfo()
@@ -343,7 +319,7 @@ pipeline {
             }
         }
 
-        // UNSTABLE EMAIL
+        // Unstable notification
         unstable {
             script {
                 def info = getEnvAndDateInfo()
@@ -367,72 +343,42 @@ pipeline {
 
 
 // =====================================================================================
-// ================================ README SECTION ======================================
+// README – PIPELINE DOCUMENTATION
 // =====================================================================================
 /*
-README – Jenkins Pipeline (Production Standard)
-==============================================
-
 OVERVIEW
 --------
 This Jenkins pipeline builds, tests, deploys, and safely manages a Java WAR
-deployment to Tomcat with automatic rollback and HTML email notifications.
+deployment to Tomcat with automatic rollback and HTML notifications.
 
-ROLLBACK STRATEGY
------------------
-1. Existing WAR is backed up before deployment
+BACKUP PATH
+-----------
+/opt/tomcat/webapps/app.war.bak
+
+ROLLBACK FLOW
+-------------
+1. Backup created before deployment
 2. Deployment failure → backup restored
-3. Tomcat restart failure → backup restored and restarted
-4. Pipeline fails explicitly after rollback
+3. Restart failure → backup restored
+4. Pipeline fails explicitly
 
-WHY THIS IS SAFE
-----------------
-✔ Prevents broken deployments
-✔ No manual rollback required
-✔ Preserves last known good artifact
-✔ Clear failure visibility
-
-EMAIL NOTIFICATIONS
--------------------
-- Triggered ONLY in post-build phase
-- HTML formatted emails
+EMAIL BEHAVIOR
+--------------
+- Post-build only
+- HTML formatted
 - Retry-safe (3 attempts)
-- Includes:
-  - Environment
-  - Build date/time
-  - Job details
-  - Build URL
-  - Console log attachment
-
-ENVIRONMENT DETECTION
----------------------
-Based on job naming convention:
-DEV-*   → DEV
-SIT-*   → SIT
-UAT-*   → UAT
-PROD-*  → PROD
+- Console log attached
 
 PIPELINE FLOW
 -------------
 Debug → Email DL → Checkout → Build → Test
-→ Deploy (Rollback Safe)
-→ Restart (Rollback Safe)
-→ Sanity → Post → Email → Cleanup
-
-REQUIRED JENKINS PLUGINS
------------------------
-- Pipeline
-- Email Extension Plugin
-- SSH Publisher Plugin
-- Workspace Cleanup Plugin
+→ Deploy → Restart → Sanity → Post → Email → Cleanup
 
 NOTES
 -----
-- VS Code Groovy warnings are false positives
-- This README section does not affect execution
-- Suitable for DEV → PROD environments
+- Safe for DEV / SIT / UAT / PROD
+- README comments do not affect execution
 
 =======================================================================================
 */
-
 
