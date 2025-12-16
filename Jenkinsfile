@@ -40,7 +40,7 @@ def defaultDL = ''
 // Post-build email list (additional)
 def PostbuildDL = ''
 
-// Variables to hold emails read from trigger file and final list
+// Variables to hold emails read from trigger file and final list (These variables are read when triggered the Job from LightWeight Automation.)
 def triggerEmail = null
 def finalEmailList = null
 
