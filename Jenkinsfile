@@ -9,7 +9,7 @@
 //
 // BACKUP LOCATION
 // ---------------
-// Existing WAR is backed up to:
+// Existing WAR is backed up on the *REMOTE TOMCAT SERVER* at:
 //     /opt/tomcat/webapps/app.war.bak
 // Used for all rollback scenarios.
 //
@@ -25,7 +25,6 @@
 
 /*
  * Builds an HTML summary table used in email notifications.
- * Keeps email content consistent across all build results.
  */
 def buildSummaryHtml() {
     return '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">' +
@@ -43,8 +42,7 @@ def buildSummaryHtml() {
 }
 
 /*
- * Determines environment name from job naming convention
- * and formats build date/time in IST timezone.
+ * Determines environment name and build timestamp (IST)
  */
 def getEnvAndDateInfo() {
 
@@ -69,13 +67,9 @@ def getEnvAndDateInfo() {
 // EMAIL CONFIGURATION
 // =====================================================================================
 
-// Static/default email distribution list
-def defaultDL = ''
+def defaultDL     = ''
+def PostbuildDL   = ''
 
-// Post-build distribution list (Ops / Release / Support)
-def PostbuildDL = ''
-
-// Dynamically resolved email lists
 def triggerEmail   = null
 def finalEmailList = null
 
@@ -86,10 +80,8 @@ def finalEmailList = null
 
 pipeline {
 
-    // Run on any available Jenkins agent
     agent any
 
-    // Global tools and environment variables
     environment {
         JAVA_HOME      = tool 'JDK'
         BUILD_TOOL_CMD = 'mvn'
@@ -97,19 +89,12 @@ pipeline {
 
     stages {
 
-        // -------------------------------------------------------------------------
-        // Displays branch information for debugging and audit clarity
-        // -------------------------------------------------------------------------
         stage('Debug Branch Info') {
             steps {
                 echo "Running Jenkinsfile from branch: ${env.GIT_BRANCH}"
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Resolves email recipients from external trigger file
-        // Falls back gracefully if file is missing
-        // -------------------------------------------------------------------------
         stage('Prepare Email Distribution List') {
             steps {
                 script {
@@ -134,19 +119,12 @@ pipeline {
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Source code checkout from configured SCM
-        // -------------------------------------------------------------------------
         stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Maven build and artifact archival
-        // WAR is fingerprinted for traceability
-        // -------------------------------------------------------------------------
         stage('Build') {
             steps {
                 sh "${BUILD_TOOL_CMD} clean install -DskipTests"
@@ -155,34 +133,49 @@ pipeline {
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Executes unit tests
-        // -------------------------------------------------------------------------
         stage('Unit Testing') {
             steps {
                 sh "${BUILD_TOOL_CMD} test"
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Deployment with backup and rollback safety
-        // Backup Path: /opt/tomcat/webapps/app.war.bak
-        // -------------------------------------------------------------------------
+        // =================================================================================
+        // DEPLOYMENT WITH REMOTE BACKUP & ROLLBACK (PRODUCTION SAFE)
+        // Backup Path (REMOTE): /opt/tomcat/webapps/app.war.bak
+        // =================================================================================
         stage('Deployment') {
             steps {
                 script {
                     try {
 
-                        // Backup existing WAR before deploying new artifact
-                        sh '''
-                            if [ -f /opt/tomcat/webapps/app.war ]; then
-                                cp /opt/tomcat/webapps/app.war \
-                                   /opt/tomcat/webapps/app.war.bak
-                                echo "Backup created at /opt/tomcat/webapps/app.war.bak"
-                            fi
-                        '''
+                        // -----------------------------------------------------------------
+                        // REMOTE BACKUP (runs on Tomcat server)
+                        // -----------------------------------------------------------------
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                if [ -f /opt/tomcat/webapps/app.war ]; then
+                                                    cp /opt/tomcat/webapps/app.war \
+                                                       /opt/tomcat/webapps/app.war.bak
+                                                    echo "Remote backup created at /opt/tomcat/webapps/app.war.bak"
+                                                else
+                                                    echo "No existing WAR found to backup"
+                                                fi
+                                            '''
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
 
-                        // Deploy WAR to Tomcat using SSH Publisher
+                        // -----------------------------------------------------------------
+                        // DEPLOY NEW WAR (remote copy)
+                        // -----------------------------------------------------------------
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
@@ -203,16 +196,32 @@ pipeline {
 
                     } catch (err) {
 
-                        // Restore backup WAR if deployment fails
-                        echo 'Deployment failed — performing rollback'
+                        echo 'Deployment failed — performing REMOTE rollback'
 
-                        sh '''
-                            if [ -f /opt/tomcat/webapps/app.war.bak ]; then
-                                mv /opt/tomcat/webapps/app.war.bak \
-                                   /opt/tomcat/webapps/app.war
-                                echo "Rollback completed"
-                            fi
-                        '''
+                        // -----------------------------------------------------------------
+                        // REMOTE ROLLBACK
+                        // -----------------------------------------------------------------
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                if [ -f /opt/tomcat/webapps/app.war.bak ]; then
+                                                    mv /opt/tomcat/webapps/app.war.bak \
+                                                       /opt/tomcat/webapps/app.war
+                                                    echo "Rollback completed using backup WAR"
+                                                else
+                                                    echo "Backup WAR not found — rollback skipped"
+                                                fi
+                                            '''
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
 
                         error "Deployment failed after rollback: ${err}"
                     }
@@ -221,25 +230,53 @@ pipeline {
         }
 
         // -------------------------------------------------------------------------
-        // Restarts Tomcat and rolls back if restart fails
+        // TOMCAT RESTART WITH REMOTE ROLLBACK SAFETY
         // -------------------------------------------------------------------------
         stage('Restart Servers') {
             steps {
                 script {
                     try {
-                        sh 'sudo systemctl restart tomcat'
-                        sh 'sudo systemctl status tomcat'
+
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                sudo systemctl restart tomcat
+                                                sudo systemctl status tomcat
+                                            '''
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+
                     } catch (err) {
 
-                        echo 'Restart failed — restoring backup WAR'
+                        echo 'Restart failed — restoring backup WAR remotely'
 
-                        sh '''
-                            if [ -f /opt/tomcat/webapps/app.war.bak ]; then
-                                mv /opt/tomcat/webapps/app.war.bak \
-                                   /opt/tomcat/webapps/app.war
-                                sudo systemctl restart tomcat
-                            fi
-                        '''
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'tomcat',
+                                    verbose: true,
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: '''
+                                                if [ -f /opt/tomcat/webapps/app.war.bak ]; then
+                                                    mv /opt/tomcat/webapps/app.war.bak \
+                                                       /opt/tomcat/webapps/app.war
+                                                    sudo systemctl restart tomcat
+                                                fi
+                                            '''
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
 
                         error "Restart failed after rollback: ${err}"
                     }
@@ -247,21 +284,13 @@ pipeline {
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Lightweight sanity validation (non-blocking)
-        // -------------------------------------------------------------------------
         stage('Sanity Check') {
             steps {
-                script {
-                    echo 'Performing basic sanity check'
-                    sh 'curl -m 5 -s http://localhost:8080 || true'
-                }
+                echo 'Performing basic sanity check'
+                sh 'curl -m 5 -s http://localhost:8080 || true'
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Logical end-of-pipeline marker
-        // -------------------------------------------------------------------------
         stage('Post Actions') {
             steps {
                 echo 'Post actions completed'
@@ -274,12 +303,10 @@ pipeline {
     // =================================================================================
     post {
 
-        // Workspace cleanup always runs
         always {
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
         }
 
-        // Success notification
         success {
             script {
                 def info = getEnvAndDateInfo()
@@ -299,7 +326,6 @@ pipeline {
             }
         }
 
-        // Failure notification
         failure {
             script {
                 def info = getEnvAndDateInfo()
@@ -319,7 +345,6 @@ pipeline {
             }
         }
 
-        // Unstable notification
         unstable {
             script {
                 def info = getEnvAndDateInfo()
@@ -346,39 +371,23 @@ pipeline {
 // README – PIPELINE DOCUMENTATION
 // =====================================================================================
 /*
-OVERVIEW
---------
-This Jenkins pipeline builds, tests, deploys, and safely manages a Java WAR
-deployment to Tomcat with automatic rollback and HTML notifications.
-
-BACKUP PATH
------------
-/opt/tomcat/webapps/app.war.bak
+BACKUP LOCATION
+---------------
+/opt/tomcat/webapps/app.war.bak   (REMOTE TOMCAT SERVER)
 
 ROLLBACK FLOW
 -------------
-1. Backup created before deployment
-2. Deployment failure → backup restored
-3. Restart failure → backup restored
+1. Remote backup before deployment
+2. Deployment failure → remote rollback
+3. Restart failure → remote rollback
 4. Pipeline fails explicitly
 
-EMAIL BEHAVIOR
+IMPORTANT NOTE
 --------------
-- Post-build only
-- HTML formatted
-- Retry-safe (3 attempts)
-- Console log attached
-
-PIPELINE FLOW
--------------
-Debug → Email DL → Checkout → Build → Test
-→ Deploy → Restart → Sanity → Post → Email → Cleanup
-
-NOTES
------
-- Safe for DEV / SIT / UAT / PROD
-- README comments do not affect execution
+Backup and rollback are executed on the Tomcat server
+using SSH Publisher (NOT on Jenkins agent).
 
 =======================================================================================
 */
+
 
