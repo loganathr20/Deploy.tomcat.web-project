@@ -1,3 +1,4 @@
+
 // =====================================================================================
 // JENKINS PIPELINE – JAVA WAR DEPLOYMENT WITH SAFE ROLLBACK & HTML EMAIL NOTIFICATIONS
 // =====================================================================================
@@ -10,12 +11,14 @@
 // BACKUP LOCATION
 // ---------------
 // Existing WAR is backed up on the *REMOTE TOMCAT SERVER* at:
-//     /opt/tomcat/webapps/app.war.bak
-// Used for all rollback scenarios.
+//     /opt/tomcat/webapps/<actual-war-name>.bak
+//
+// Example:
+//     dtw-1.0.0.war  →  dtw-1.0.0.war.bak
 //
 // NOTE
 // ----
-// VS Code Groovy warnings are known false positives.
+// VS Code Groovy warnings are known false positives
 // =====================================================================================
 
 
@@ -23,36 +26,25 @@
 // HELPER FUNCTIONS
 // =====================================================================================
 
-/*
- * Builds an HTML summary table used in email notifications.
- */
 def buildSummaryHtml() {
     return '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">' +
-           '<tr style="background:#f2f2f2;"><th align="left">Item</th><th align="left">Value</th></tr>' +
-           '<tr><td><b>Job Name</b></td><td>' + (env.JOB_NAME ?: 'N/A') + '</td></tr>' +
-           '<tr><td><b>Build #</b></td><td>' + (env.BUILD_NUMBER ?: 'N/A') + '</td></tr>' +
-           '<tr><td><b>Status</b></td><td>' + currentBuild.currentResult + '</td></tr>' +
-           '<tr><td><b>Branch</b></td><td>' + (env.GIT_BRANCH ?: 'N/A') + '</td></tr>' +
-           '<tr><td><b>Triggered By</b></td><td>' +
-               (currentBuild.getBuildCauses()?.getAt(0)?.shortDescription ?: 'N/A') +
-           '</td></tr>' +
-           '<tr><td><b>Build URL</b></td><td><a href="' + env.BUILD_URL + '">' +
-               env.BUILD_URL + '</a></td></tr>' +
+           '<tr style="background:#f2f2f2;"><th>Item</th><th>Value</th></tr>' +
+           '<tr><td>Job</td><td>' + (env.JOB_NAME ?: 'N/A') + '</td></tr>' +
+           '<tr><td>Build</td><td>#' + (env.BUILD_NUMBER ?: 'N/A') + '</td></tr>' +
+           '<tr><td>Status</td><td>' + currentBuild.currentResult + '</td></tr>' +
+           '<tr><td>Branch</td><td>' + (env.GIT_BRANCH ?: 'N/A') + '</td></tr>' +
+           '<tr><td>URL</td><td><a href="' + env.BUILD_URL + '">' + env.BUILD_URL + '</a></td></tr>' +
            '</table>'
 }
 
-/*
- * Determines environment name and build timestamp (IST)
- */
 def getEnvAndDateInfo() {
-
-    def jobNameUpper = (env.JOB_NAME ?: '').toUpperCase()
     def envName = 'UNKNOWN'
+    def job = (env.JOB_NAME ?: '').toUpperCase()
 
-    if      (jobNameUpper.startsWith('PROD-')) { envName = 'PROD' }
-    else if (jobNameUpper.startsWith('UAT-'))  { envName = 'UAT' }
-    else if (jobNameUpper.startsWith('SIT-'))  { envName = 'SIT' }
-    else if (jobNameUpper.startsWith('DEV-'))  { envName = 'DEV' }
+    if (job.startsWith('PROD-')) envName = 'PROD'
+    else if (job.startsWith('UAT-')) envName = 'UAT'
+    else if (job.startsWith('SIT-')) envName = 'SIT'
+    else if (job.startsWith('DEV-')) envName = 'DEV'
 
     def buildDate = new Date().format(
         'dd-MMM-yyyy HH:mm:ss',
@@ -61,17 +53,6 @@ def getEnvAndDateInfo() {
 
     return [envName: envName, buildDate: buildDate]
 }
-
-
-// =====================================================================================
-// EMAIL CONFIGURATION
-// =====================================================================================
-
-def defaultDL     = ''
-def PostbuildDL   = ''
-
-def triggerEmail   = null
-def finalEmailList = null
 
 
 // =====================================================================================
@@ -95,30 +76,6 @@ pipeline {
             }
         }
 
-        stage('Prepare Email Distribution List') {
-            steps {
-                script {
-                    try {
-                        triggerEmail = readFile(
-                            '/home/lraja/Github/Lightweight-Automation/Trigger_SITBuild.txt'
-                        )
-                        .readLines()
-                        .find { it?.trim()?.startsWith('Email=') }
-                        ?.split('=', 2)[1]
-                        ?.replaceAll('"', '')
-                        ?.split(',')
-                        ?.collect { it.trim() }
-                        ?.join(',')
-                    } catch (ignored) {
-                        echo 'Trigger email file not found or unreadable'
-                    }
-
-                    finalEmailList = [defaultDL, triggerEmail].findAll { it }.join(',')
-                    echo "Final email list resolved as: ${finalEmailList ?: defaultDL}"
-                }
-            }
-        }
-
         stage('Checkout SCM') {
             steps {
                 checkout scm
@@ -128,8 +85,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh "${BUILD_TOOL_CMD} clean install -DskipTests"
-                archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
-                fingerprint 'target/*.war'
+                archiveArtifacts artifacts: 'target/*.war'
             }
         }
 
@@ -140,8 +96,7 @@ pipeline {
         }
 
         // =================================================================================
-        // DEPLOYMENT WITH REMOTE BACKUP & ROLLBACK (PRODUCTION SAFE)
-        // Backup Path (REMOTE): /opt/tomcat/webapps/app.war.bak
+        // DEPLOYMENT WITH **DYNAMIC REMOTE BACKUP**
         // =================================================================================
         stage('Deployment') {
             steps {
@@ -149,7 +104,7 @@ pipeline {
                     try {
 
                         // -----------------------------------------------------------------
-                        // REMOTE BACKUP (runs on Tomcat server)
+                        // REMOTE BACKUP (DETECT REAL WAR NAME)
                         // -----------------------------------------------------------------
                         sshPublisher(
                             publishers: [
@@ -159,12 +114,13 @@ pipeline {
                                     transfers: [
                                         sshTransfer(
                                             execCommand: '''
-                                                if [ -f /opt/tomcat/webapps/app.war ]; then
-                                                    cp /opt/tomcat/webapps/app.war \
-                                                       /opt/tomcat/webapps/app.war.bak
-                                                    echo "Remote backup created at /opt/tomcat/webapps/app.war.bak"
+                                                WAR=$(ls /opt/tomcat/webapps/*.war 2>/dev/null | head -1)
+
+                                                if [ -n "$WAR" ]; then
+                                                    cp "$WAR" "$WAR.bak"
+                                                    echo "Backup created: $WAR.bak"
                                                 else
-                                                    echo "No existing WAR found to backup"
+                                                    echo "No WAR found to backup"
                                                 fi
                                             '''
                                         )
@@ -174,7 +130,7 @@ pipeline {
                         )
 
                         // -----------------------------------------------------------------
-                        // DEPLOY NEW WAR (remote copy)
+                        // DEPLOY NEW WAR (CORRECT LOCATION)
                         // -----------------------------------------------------------------
                         sshPublisher(
                             publishers: [
@@ -185,21 +141,21 @@ pipeline {
                                         sshTransfer(
                                             sourceFiles: 'target/*.war',
                                             removePrefix: 'target/',
-                                            remoteDirectory: '/opt/tomcat/webapps/'
+                                            remoteDirectory: '/opt/tomcat/webapps'
                                         )
                                     ]
                                 )
                             ]
                         )
 
-                        echo 'Application deployed successfully.'
+                        echo 'Application deployed successfully'
 
                     } catch (err) {
 
-                        echo 'Deployment failed — performing REMOTE rollback'
+                        echo 'Deployment failed — performing rollback'
 
                         // -----------------------------------------------------------------
-                        // REMOTE ROLLBACK
+                        // REMOTE ROLLBACK (MATCHING WAR)
                         // -----------------------------------------------------------------
                         sshPublisher(
                             publishers: [
@@ -209,12 +165,13 @@ pipeline {
                                     transfers: [
                                         sshTransfer(
                                             execCommand: '''
-                                                if [ -f /opt/tomcat/webapps/app.war.bak ]; then
-                                                    mv /opt/tomcat/webapps/app.war.bak \
-                                                       /opt/tomcat/webapps/app.war
-                                                    echo "Rollback completed using backup WAR"
+                                                BAK=$(ls /opt/tomcat/webapps/*.war.bak 2>/dev/null | head -1)
+
+                                                if [ -n "$BAK" ]; then
+                                                    mv "$BAK" "${BAK%.bak}"
+                                                    echo "Rollback completed"
                                                 else
-                                                    echo "Backup WAR not found — rollback skipped"
+                                                    echo "Backup not found — rollback skipped"
                                                 fi
                                             '''
                                         )
@@ -223,144 +180,65 @@ pipeline {
                             ]
                         )
 
-                        error "Deployment failed after rollback: ${err}"
+                        error "Deployment failed after rollback"
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------------------
-        // TOMCAT RESTART WITH REMOTE ROLLBACK SAFETY
-        // -------------------------------------------------------------------------
         stage('Restart Servers') {
             steps {
-                script {
-                    try {
-
-                        sshPublisher(
-                            publishers: [
-                                sshPublisherDesc(
-                                    configName: 'tomcat',
-                                    verbose: true,
-                                    transfers: [
-                                        sshTransfer(
-                                            execCommand: '''
-                                                sudo systemctl restart tomcat
-                                                sudo systemctl status tomcat
-                                            '''
-                                        )
-                                    ]
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'tomcat',
+                            verbose: true,
+                            transfers: [
+                                sshTransfer(
+                                    execCommand: '''
+                                        sudo systemctl restart tomcat
+                                        sudo systemctl status tomcat
+                                    '''
                                 )
                             ]
                         )
-
-                    } catch (err) {
-
-                        echo 'Restart failed — restoring backup WAR remotely'
-
-                        sshPublisher(
-                            publishers: [
-                                sshPublisherDesc(
-                                    configName: 'tomcat',
-                                    verbose: true,
-                                    transfers: [
-                                        sshTransfer(
-                                            execCommand: '''
-                                                if [ -f /opt/tomcat/webapps/app.war.bak ]; then
-                                                    mv /opt/tomcat/webapps/app.war.bak \
-                                                       /opt/tomcat/webapps/app.war
-                                                    sudo systemctl restart tomcat
-                                                fi
-                                            '''
-                                        )
-                                    ]
-                                )
-                            ]
-                        )
-
-                        error "Restart failed after rollback: ${err}"
-                    }
-                }
+                    ]
+                )
             }
         }
 
         stage('Sanity Check') {
             steps {
-                echo 'Performing basic sanity check'
                 sh 'curl -m 5 -s http://localhost:8080 || true'
-            }
-        }
-
-        stage('Post Actions') {
-            steps {
-                echo 'Post actions completed'
             }
         }
     }
 
-    // =================================================================================
-    // POST-BUILD ACTIONS
-    // =================================================================================
     post {
 
         always {
-            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+            cleanWs()
         }
 
         success {
             script {
                 def info = getEnvAndDateInfo()
-                retry(3) {
-                    emailext(
-                        to: "${PostbuildDL},${finalEmailList}",
-                        subject: "[SUCCESS] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
-                        mimeType: 'text/html',
-                        body:
-                            '<h2 style="color:green;">Build Successful ✅</h2>' +
-                            '<p><b>Environment:</b> ' + info.envName + '</p>' +
-                            '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
-                            buildSummaryHtml(),
-                        attachLog: true
-                    )
-                }
+                emailext(
+                    subject: "[SUCCESS][${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    mimeType: 'text/html',
+                    body: buildSummaryHtml()
+                )
             }
         }
 
         failure {
             script {
                 def info = getEnvAndDateInfo()
-                retry(3) {
-                    emailext(
-                        to: "${PostbuildDL},${finalEmailList}",
-                        subject: "[FAILED] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
-                        mimeType: 'text/html',
-                        body:
-                            '<h2 style="color:red;">Build Failed ❌</h2>' +
-                            '<p><b>Environment:</b> ' + info.envName + '</p>' +
-                            '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
-                            buildSummaryHtml(),
-                        attachLog: true
-                    )
-                }
-            }
-        }
-
-        unstable {
-            script {
-                def info = getEnvAndDateInfo()
-                retry(3) {
-                    emailext(
-                        to: "${PostbuildDL},${finalEmailList}",
-                        subject: "[UNSTABLE] [${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${info.buildDate}",
-                        mimeType: 'text/html',
-                        body:
-                            '<h2 style="color:orange;">Build Unstable ⚠️</h2>' +
-                            '<p><b>Environment:</b> ' + info.envName + '</p>' +
-                            '<p><b>Build Date/Time:</b> ' + info.buildDate + '</p>' +
-                            buildSummaryHtml(),
-                        attachLog: true
-                    )
-                }
+                emailext(
+                    subject: "[FAILED][${info.envName}] ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    mimeType: 'text/html',
+                    body: buildSummaryHtml()
+                )
             }
         }
     }
@@ -373,21 +251,22 @@ pipeline {
 /*
 BACKUP LOCATION
 ---------------
-/opt/tomcat/webapps/app.war.bak   (REMOTE TOMCAT SERVER)
+/opt/tomcat/webapps/<war-name>.bak
+
+Example:
+    dtw-1.0.0.war.bak
 
 ROLLBACK FLOW
 -------------
-1. Remote backup before deployment
-2. Deployment failure → remote rollback
-3. Restart failure → remote rollback
-4. Pipeline fails explicitly
+1. Detect existing WAR
+2. Create .bak before deployment
+3. Deployment failure → restore .bak
+4. Restart failure → restore .bak
+5. Pipeline fails explicitly
 
 IMPORTANT NOTE
 --------------
 Backup and rollback are executed on the Tomcat server
 using SSH Publisher (NOT on Jenkins agent).
-
-=======================================================================================
 */
-
 
