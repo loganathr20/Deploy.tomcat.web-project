@@ -2,7 +2,9 @@
 // This script defines a series of stages for building, testing, and deploying a Java application.
 
 // START of PIPELINE Customation for Email Notification  and Lightweight Automation 
+
 def buildSummaryHtml() {
+
     return """
     <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-family:Arial;">
         <tr style="background:#f2f2f2;">
@@ -44,13 +46,12 @@ def buildSummaryHtml() {
 
 
 def getEnvAndDateInfo() {
-    def job = env.JOB_NAME?.toUpperCase()
     def envName = 'UNKNOWN'
 
-    if (job.contains('DEV'))  { envName = 'DEV' }
-    if (job.contains('SIT'))  { envName = 'SIT' }
-    if (job.contains('UAT'))  { envName = 'UAT' }
-    if (job.contains('PROD')) { envName = 'PROD'}
+    if (env.JOB_NAME?.toUpperCase().contains('PROD')) { envName = 'PROD' }
+    if (env.JOB_NAME?.toUpperCase().contains('UAT'))  { envName = 'UAT' }
+    if (env.JOB_NAME?.toUpperCase().contains('SIT'))  { envName = 'SIT' }
+    if (env.JOB_NAME?.toUpperCase().contains('DEV'))  { envName = 'DEV' }
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
@@ -268,8 +269,6 @@ pipeline {
             cleanWs(deleteDirs: true, disableDeferredWipeout: true)
         }
     }
-} 
-
 }
-
+ 
 
