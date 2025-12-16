@@ -54,7 +54,7 @@ def getEnvAndDateInfo() {
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
-    return [envName: envName, buildDate/Time: buildDate]
+    return [envName: envName, buildDate: buildDate]
 }
 
 
@@ -213,7 +213,7 @@ pipeline {
                         body: """
                         <h2 style="color:green;">Build Successful ✅</h2>
                         <p><b>Environment:</b> ${info.envName}</p>
-                        <p><b>Build Date:</b> ${info.buildDate}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
                         ${buildSummaryHtml()}
                         """,
                         attachLog: true
@@ -233,7 +233,7 @@ pipeline {
                         body: """
                         <h2 style="color:red;">Build Failed ❌</h2>
                         <p><b>Environment:</b> ${info.envName}</p>
-                        <p><b>Build Date:</b> ${info.buildDate}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
                         ${buildSummaryHtml()}
                         """,
                         attachLog: true
@@ -253,7 +253,7 @@ pipeline {
                         body: """
                         <h2 style="color:orange;">Build Unstable ⚠️</h2>
                         <p><b>Environment:</b> ${info.envName}</p>
-                        <p><b>Build Date:</b> ${info.buildDate}</p>
+                        <p><b>Build Date/Time:</b> ${info.buildDate}</p>
                         ${buildSummaryHtml()}
                         """,
                         attachLog: true
