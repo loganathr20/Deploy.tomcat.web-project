@@ -54,7 +54,7 @@ def getEnvAndDateInfo() {
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
-    return [envName: envName, buildDate: buildDate]
+    return [envName: envName, buildDate/Time: buildDate]
 }
 
 
