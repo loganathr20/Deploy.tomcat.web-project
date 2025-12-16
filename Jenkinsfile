@@ -41,18 +41,20 @@ def buildSummaryHtml() {
  * ADDITION: Helper function to resolve ENV name and Build Date
  * No existing logic disturbed
  */
+
 def getEnvAndDateInfo() {
     def envName = 'UNKNOWN'
 
-    if (env.JOB_NAME =~ /DEV/i)  envName = 'DEV'
-    if (env.JOB_NAME =~ /SIT/i)  envName = 'SIT'
-    if (env.JOB_NAME =~ /UAT/i)  envName = 'UAT'
-    if (env.JOB_NAME =~ /PROD/i) envName = 'PROD'
+    if (env.JOB_NAME =~ /DEV/i)  { envName = 'DEV' }
+    if (env.JOB_NAME =~ /SIT/i)  { envName = 'SIT' }
+    if (env.JOB_NAME =~ /UAT/i)  { envName = 'UAT' }
+    if (env.JOB_NAME =~ /PROD/i) { envName = 'PROD' }
 
     def buildDate = new Date().format('dd-MMM-yyyy HH:mm:ss')
 
     return [envName: envName, buildDate: buildDate]
 }
+
 
 // email list for default Distribution list. This will send mail additional mail excluding Email configured in Trigger file.
 def defaultDL = ''
