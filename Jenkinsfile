@@ -68,9 +68,13 @@ def getEnvAndDateInfo() {
 // EMAIL CONFIGURATION VARIABLES
 // =====================================================================================
 
-def defaultDL     = "l_raja@hotmail.com"        // Static default DL
+// def defaultDL     = "l_raja@hotmail.com"        // Static default DL
+def defaultDL     = ''        // Static default DL
+
 def PostbuildDL   = ''        // Optional post-build DL
-def triggerEmail   = null     // Dynamically read from trigger file
+
+def triggerEmail   = null     // Dynamically read from trigger file. This is configured in Light Weight automation
+
 def finalEmailList = null     // Combined email list
 def rollbackExecuted = false  // Tracks if rollback was executed during deployment/restart
 
