@@ -95,7 +95,7 @@ pipeline {
 
     environment {
         BUILD_TOOL_CMD = 'mvn'                // Maven command
-        PATH = "/opt/maven/bin:${env.PATH}"
+ //       PATH = "/opt/maven/bin:${env.PATH}"
     }
     
 
