@@ -96,8 +96,6 @@ pipeline {
     environment {
         JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
         BUILD_TOOL_CMD = 'mvn'                // Maven command
-//        sh 'mvn -version'
-  //      sh 'which java'
     }
     
 
@@ -106,8 +104,8 @@ pipeline {
         stage('Verify Tools') {
             steps {
               sh 'echo "JAVA_HOME=$JAVA_HOME"'
-              sh 'java -version'
-              sh 'mvn -version'
+              sh 'java --version'
+              sh 'mvn --version'
               sh 'which java'
               sh 'which mvn'
             }
