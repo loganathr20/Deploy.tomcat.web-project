@@ -88,9 +88,8 @@ pipeline {
     agent any
     
     tools {
-//        maven 'mvn'
-        maven 'Maven-3.9'
-
+        maven 'mvn'
+//        maven 'Maven-3.9'
         jdk 'JDK'       // MUST match Jenkins Global Tool Configuration
 
     }
