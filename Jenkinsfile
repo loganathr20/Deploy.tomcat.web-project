@@ -100,19 +100,20 @@ pipeline {
   //      sh ''which java''
     }
     
-    stage('Verify Tools') {
-        steps {
-          sh 'echo "JAVA_HOME=$JAVA_HOME"'
-          sh 'java -version'
-          sh 'mvn -version'
-          sh 'which java'
-          sh 'which mvn'
-        }
-    }
 
 
 
     stages {
+
+        stage('Verify Tools') {
+            steps {
+              sh 'echo "JAVA_HOME=$JAVA_HOME"'
+              sh 'java -version'
+              sh 'mvn -version'
+              sh 'which java'
+              sh 'which mvn'
+            }
+        }
 
         // -------------------------------------------------------------------------
         // DEBUG: BRANCH INFO
