@@ -86,7 +86,11 @@ def rollbackExecuted = false  // Tracks if rollback was executed during deployme
 pipeline {
 
     agent any
-
+    
+    tools {
+        maven 'Maven-3.9'
+    }
+    
     environment {
         JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
         BUILD_TOOL_CMD = 'mvn'                // Maven command
