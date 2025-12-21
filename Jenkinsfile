@@ -89,7 +89,7 @@ pipeline {
     
     tools {
         maven 'mvn'
-        jdk 'JDK-21'       // MUST match Jenkins Global Tool Configuration
+        jdk 'JDK'       // MUST match Jenkins Global Tool Configuration
 
     }
 
