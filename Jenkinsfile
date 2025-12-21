@@ -89,13 +89,13 @@ pipeline {
     
     tools {
         maven 'mvn'
-//        maven 'Maven-3.9'
         jdk 'JDK'       // MUST match Jenkins Global Tool Configuration
 
     }
 
     environment {
         BUILD_TOOL_CMD = 'mvn'                // Maven command
+        PATH = "/opt/maven/bin:${env.PATH}"
     }
     
 
