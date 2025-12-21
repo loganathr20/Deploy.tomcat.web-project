@@ -94,7 +94,7 @@ pipeline {
     }
 
     environment {
-        JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
+//        JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
         BUILD_TOOL_CMD = 'mvn'                // Maven command
 //        sh 'mvn -version'
   //      sh ''which java''
