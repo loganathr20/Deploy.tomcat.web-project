@@ -89,14 +89,28 @@ pipeline {
     
     tools {
         maven 'mvn'
+        jdk 'JDK-21'       // MUST match Jenkins Global Tool Configuration
+
     }
-    
+
     environment {
         JAVA_HOME      = tool 'JDK'           // JDK installation configured in Jenkins
         BUILD_TOOL_CMD = 'mvn'                // Maven command
-        sh 'mvn -version'
-        sh ''which java''
+//        sh 'mvn -version'
+  //      sh ''which java''
     }
+    
+    stage('Verify Tools') {
+        steps {
+          sh 'echo "JAVA_HOME=$JAVA_HOME"'
+          sh 'java -version'
+          sh 'mvn -version'
+          sh 'which java'
+          sh 'which mvn'
+        }
+    }
+
+
 
     stages {
 
